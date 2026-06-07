@@ -19,11 +19,11 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [isVegOnly, setIsVegOnly] = useState(false);
-  
+
   // Cart state
   const [cartItems, setCartItems] = useState<OrderItem[]>([]);
   const [hasModifications, setHasModifications] = useState(false);
-  
+
   const topRef = useRef<HTMLDivElement>(null);
   const { createOrder, updateOrderItems } = useOrderStore();
 
@@ -96,7 +96,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   };
 
   const updateInstructions = (id: string, text: string) => {
-    setCartItems(cartItems.map(item => 
+    setCartItems(cartItems.map(item =>
       item.id === id ? { ...item, instructions: text } : item
     ));
     setHasModifications(true);
@@ -106,7 +106,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
 
   const handleConfirm = () => {
     if (cartItems.length === 0) return;
-    
+
     if (mode === 'create') {
       createOrder(tableNumber, cartItems, totalCost);
     } else {
@@ -138,7 +138,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
 
         {/* Content Area - Cart at Top, Menu Below */}
         <div className="flex-1 overflow-y-auto no-scrollbar relative p-4 sm:p-6 pb-32">
-          
+
           {/* Current Cart Items */}
           {cartItems.length > 0 && (
             <div className="mb-8 bg-orange-50/50 p-4 rounded-2xl border border-orange-100">
@@ -151,9 +151,9 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                         <span className="font-medium text-slate-800">{item.name}</span>
                         <span className="font-semibold text-orange-600">₹{item.price * item.quantity}</span>
                       </div>
-                      <input 
-                        type="text" 
-                        placeholder="Add cooking instructions..." 
+                      <input
+                        type="text"
+                        placeholder="Add cooking instructions..."
                         className="text-sm bg-slate-50 border-none outline-none mt-2 w-full p-2 rounded-lg text-slate-600 focus:ring-1 focus:ring-orange-300"
                         value={item.instructions || ''}
                         onChange={(e) => updateInstructions(item.id, e.target.value)}
@@ -161,12 +161,12 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center bg-slate-100 rounded-lg p-1">
-                        <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:bg-white rounded shadow-sm text-slate-600"><Minus className="w-4 h-4"/></button>
+                        <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:bg-white rounded shadow-sm text-slate-600"><Minus className="w-4 h-4" /></button>
                         <span className="w-8 text-center font-medium">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:bg-white rounded shadow-sm text-slate-600"><Plus className="w-4 h-4"/></button>
+                        <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:bg-white rounded shadow-sm text-slate-600"><Plus className="w-4 h-4" /></button>
                       </div>
                       <button onClick={() => removeItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <X className="w-5 h-5"/>
+                        <X className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
@@ -179,23 +179,23 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
           <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md py-4 border-b border-slate-100 mb-6">
             <div className="flex items-center space-x-4 overflow-x-auto no-scrollbar pb-2">
               <label className="flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-full cursor-pointer hover:bg-slate-200 transition-colors whitespace-nowrap">
-                <input 
-                  type="checkbox" 
-                  checked={isVegOnly} 
+                <input
+                  type="checkbox"
+                  checked={isVegOnly}
                   onChange={(e) => setIsVegOnly(e.target.checked)}
                   className="accent-green-600 w-4 h-4"
                 />
                 <span className="text-sm font-medium text-slate-700">Veg Only</span>
               </label>
 
-              <button 
+              <button
                 onClick={() => setActiveCategory('all')}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === 'all' ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
               >
                 All
               </button>
               {categories.map(cat => (
-                <button 
+                <button
                   key={cat._id}
                   onClick={() => setActiveCategory(cat._id)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat._id ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
@@ -227,8 +227,8 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                   </div>
                   {item.description && <p className="text-sm text-slate-500 line-clamp-2 mb-4">{item.description}</p>}
                   <div className="mt-auto">
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       className="w-full font-bold"
                       onClick={() => handleAddItem(item)}
                     >
@@ -250,16 +250,16 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
           </div>
           <div className="flex items-center space-x-4">
             {mode === 'modify' && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={onClose}
                 disabled={hasModifications}
               >
                 Continue without changes
               </Button>
             )}
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={handleConfirm}
               disabled={mode === 'modify' ? !hasModifications : cartItems.length === 0}
             >
@@ -269,7 +269,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </div>
 
         {/* Jump to top button */}
-        <button 
+        <button
           onClick={() => topRef.current?.scrollIntoView({ behavior: 'smooth' })}
           className="absolute bottom-28 right-6 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-700 transition-colors z-20"
         >

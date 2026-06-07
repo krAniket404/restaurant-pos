@@ -28,7 +28,7 @@ export interface Order {
 }
 
 export interface Table {
-  id: string;
+  _id: string;
   tableNumber: number;
   capacity?: number;
 }
@@ -39,7 +39,7 @@ export interface MenuItem {
   price: number;
   isVeg: boolean;
   category: {
-    _ref: string;
+    _id: string;
     title: string;
   };
   imageUrl: string;

@@ -25,7 +25,7 @@ export default function WaiterDashboard() {
   const getTableColor = (tableNumber: number) => {
     const tableOrders = orders.filter(o => o.tableNumber === tableNumber && o.status !== 'paid');
     if (tableOrders.length === 0) return 'bg-white border-slate-200 text-slate-700 hover:border-slate-300';
-    
+
     const statuses = tableOrders.map(o => o.status);
     if (statuses.includes('on_hold')) return 'bg-red-100 border-red-300 text-red-800';
     if (statuses.includes('requested')) return 'bg-yellow-100 border-yellow-300 text-yellow-800';
@@ -33,7 +33,7 @@ export default function WaiterDashboard() {
     if (statuses.includes('prepared')) return 'bg-green-100 border-green-300 text-green-800';
     if (statuses.includes('served')) return 'bg-blue-100 border-blue-300 text-blue-800';
     if (statuses.includes('in_queue')) return 'bg-purple-100 border-purple-300 text-purple-800';
-    
+
     return 'bg-slate-100 border-slate-300';
   };
 
@@ -47,10 +47,10 @@ export default function WaiterDashboard() {
     return orders.filter(o => o.tableNumber === selectedTable.tableNumber && o.status !== 'paid');
   }, [orders, selectedTable]);
 
-  const canCreate = activeOrders.length === 0 || activeOrders.every(o => o.status === 'served'); 
+  const canCreate = activeOrders.length === 0 || activeOrders.every(o => o.status === 'served');
   // actually, multiple orders can exist. Waiter can create new order anytime to add more?
   // Prompt says: "Since the table is not associated with any orders yet, modify and cancel should be disabled. After waiter clicks create new order...". Wait, if there IS an active order, "create new order" should be disabled and "modify" enabled.
-  
+
   const hasActiveOrder = activeOrders.length > 0;
 
   const handleCreateOrder = () => {
@@ -101,29 +101,29 @@ export default function WaiterDashboard() {
         ))}
       </div>
 
-      <Modal 
-        isOpen={isActionModalOpen} 
+      <Modal
+        isOpen={isActionModalOpen}
         onClose={() => setIsActionModalOpen(false)}
         title={`Table ${selectedTable?.tableNumber} Actions`}
       >
         <div className="flex flex-col space-y-4">
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             onClick={handleCreateOrder}
             disabled={activeOrders.some(o => ['on_hold', 'requested'].includes(o.status))}
           >
             Create New Order
           </Button>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             variant="secondary"
             onClick={handleModifyOrder}
             disabled={!hasActiveOrder}
           >
             Modify Order
           </Button>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             variant="danger"
             onClick={handleCancelOrder}
             disabled={!hasActiveOrder || activeOrders.some(o => ['preparing', 'prepared', 'served', 'paid'].includes(o.status))}
@@ -134,7 +134,7 @@ export default function WaiterDashboard() {
       </Modal>
 
       {selectedTable && isMenuModalOpen && (
-        <MenuModal 
+        <MenuModal
           isOpen={isMenuModalOpen}
           onClose={() => setIsMenuModalOpen(false)}
           tableNumber={selectedTable.tableNumber}
