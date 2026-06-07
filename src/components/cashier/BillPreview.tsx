@@ -1,0 +1,133 @@
+'use client';
+import React, { useRef } from 'react';
+import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
+import { Order } from '../../types';
+import { Printer, Check } from 'lucide-react';
+
+interface BillPreviewProps {
+  isOpen: boolean;
+  onClose: () => void;
+  order: Order | null;
+  restaurantName: string;
+  onMarkPaid: (orderId: string) => Promise<void>;
+}
+
+export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order, restaurantName, onMarkPaid }) => {
+  const printRef = useRef<HTMLDivElement>(null);
+
+  if (!order || !isOpen) return null;
+
+  const subtotal = order.total;
+  const cgst = subtotal * 0.025;
+  const sgst = subtotal * 0.025;
+  const grandTotal = subtotal + cgst + sgst;
+
+  const handlePrint = () => {
+    // In a real app, this would use window.print() and CSS @media print
+    window.print();
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md bg-white">
+      <div className="flex flex-col h-full relative" ref={printRef}>
+        
+        {/* Printable Area - style for receipt look */}
+        <div className="p-8 bg-[#fdfbf7] font-mono text-sm text-slate-800">
+          <div className="text-center mb-6 border-b border-dashed border-slate-300 pb-6">
+            <h2 className="text-xl font-bold uppercase tracking-wider">{restaurantName || 'Restaurant Name'}</h2>
+            <p className="text-xs text-slate-500 mt-1">Tax Invoice</p>
+          </div>
+
+          <div className="flex justify-between mb-4 text-xs border-b border-dashed border-slate-300 pb-4">
+            <div>
+              <p>Table: <span className="font-bold">{order.tableNumber}</span></p>
+              <p>Order: #{order.id.slice(-6).toUpperCase()}</p>
+            </div>
+            <div className="text-right">
+              <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
+              <p>Time: {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+            </div>
+          </div>
+
+          <div className="mb-4 border-b border-dashed border-slate-300 pb-4">
+            <div className="flex justify-between font-bold mb-2 uppercase text-xs">
+              <span className="flex-1">Item</span>
+              <span className="w-12 text-center">Qty</span>
+              <span className="w-20 text-right">Amt</span>
+            </div>
+            {order.items.map(item => (
+              <div key={item.id} className="flex justify-between mb-1">
+                <span className="flex-1 truncate pr-2">{item.name}</span>
+                <span className="w-12 text-center">{item.quantity}</span>
+                <span className="w-20 text-right">{(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-1 mb-6 border-b border-dashed border-slate-300 pb-4">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>CGST (2.5%)</span>
+              <span>₹{cgst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>SGST (2.5%)</span>
+              <span>₹{sgst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t border-dashed border-slate-300">
+              <span>Grand Total</span>
+              <span>₹{grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="text-center text-xs text-slate-500 mt-8">
+            <p>Thank you for dining with us!</p>
+            <p className="mt-1">Please visit again</p>
+          </div>
+        </div>
+
+        {/* Action Buttons (Not printable) */}
+        <div className="p-4 bg-white border-t flex items-center space-x-3 mt-4 print:hidden">
+          <Button variant="secondary" onClick={handlePrint} className="flex-1 flex items-center justify-center bg-slate-100 text-slate-700 hover:bg-slate-200">
+            <Printer className="w-4 h-4 mr-2" /> Print Bill
+          </Button>
+          <Button 
+            className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => {
+              onMarkPaid(order.id);
+              onClose();
+            }}
+          >
+            <Check className="w-4 h-4 mr-2" /> Mark as Paid
+          </Button>
+        </div>
+
+        {/* Global style to hide everything except receipt on print */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .max-w-md, .max-w-md * {
+              visibility: visible;
+            }
+            .max-w-md {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              box-shadow: none;
+            }
+            .print\\:hidden {
+              display: none !important;
+            }
+          }
+        `}} />
+      </div>
+    </Modal>
+  );
+};
