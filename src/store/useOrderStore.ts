@@ -40,33 +40,49 @@ export const useOrderStore = create<OrderStore>()(
         return unsubscribe;
       },
       createOrder: async (tableNumber, items, total) => {
-        await addDoc(collection(db, 'orders'), {
-          tableNumber,
-          items,
-          status: 'requested',
-          total,
-          createdAt: Date.now(),
-          updatedAt: Date.now()
-        });
+        try {
+          await addDoc(collection(db, 'orders'), {
+            tableNumber,
+            items,
+            status: 'requested',
+            total,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+        } catch (error) {
+          console.error("Error creating order in Firestore:", error);
+        }
       },
       updateOrderStatus: async (orderId, status, reason) => {
-        const orderRef = doc(db, 'orders', orderId);
-        const updateData: any = { status, updatedAt: Date.now() };
-        if (reason) updateData.holdReason = reason;
-        await updateDoc(orderRef, updateData);
+        try {
+          const orderRef = doc(db, 'orders', orderId);
+          const updateData: any = { status, updatedAt: Date.now() };
+          if (reason) updateData.holdReason = reason;
+          await updateDoc(orderRef, updateData);
+        } catch (error) {
+          console.error("Error updating order status:", error);
+        }
       },
       updateOrderItems: async (orderId, items, total) => {
-        const orderRef = doc(db, 'orders', orderId);
-        await updateDoc(orderRef, {
-          items,
-          total,
-          status: 'requested',
-          updatedAt: Date.now()
-        });
+        try {
+          const orderRef = doc(db, 'orders', orderId);
+          await updateDoc(orderRef, {
+            items,
+            total,
+            status: 'requested',
+            updatedAt: Date.now()
+          });
+        } catch (error) {
+          console.error("Error updating order items:", error);
+        }
       },
       deleteOrder: async (orderId) => {
-        const orderRef = doc(db, 'orders', orderId);
-        await deleteDoc(orderRef);
+        try {
+          const orderRef = doc(db, 'orders', orderId);
+          await deleteDoc(orderRef);
+        } catch (error) {
+          console.error("Error deleting order:", error);
+        }
       }
     }),
     {

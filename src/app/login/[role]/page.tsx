@@ -42,14 +42,7 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
       const users = await fetchUsers();
       const user = users.find((u: any) => u.role === role && u.username === username && u.password === password);
 
-      // Fallback for demo purposes if Sanity is not configured or empty
-      const isFallback =
-        (role === 'owner' && username === 'owner' && password === 'owner') ||
-        (role === 'cashier' && username === 'cashier' && password === 'cashier') ||
-        (role === 'manager' && username === 'manager' && password === 'manager') ||
-        (role === 'waiter' && username === 'waiter' && password === 'waiter');
-
-      if (user || isFallback) {
+      if (user) {
         login({ role: role as any, username });
         router.push(`/${role}`);
       } else {
