@@ -25,6 +25,7 @@ export interface Order {
   updatedAt: number;
   total: number;
   holdReason?: string;
+  isModified?: boolean;
 }
 
 export interface Table {

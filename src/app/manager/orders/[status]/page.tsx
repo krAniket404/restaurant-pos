@@ -46,9 +46,16 @@ export default function KitchenOrdersPage({ params }: { params: Promise<{ status
           {filteredOrders.map(order => (
             <Card key={order.id} className="border border-slate-200 shadow-sm flex flex-col">
               <div className="bg-slate-800 text-white p-4 border-b flex justify-between items-center">
-                <div>
-                  <span className="font-bold text-lg">Table {order.tableNumber}</span>
-                  <div className="text-xs text-slate-400 mt-1">Order #{order.id.slice(-6).toUpperCase()}</div>
+                <div className="flex items-center space-x-3">
+                  <div>
+                    <span className="font-bold text-lg">Table {order.tableNumber}</span>
+                    <div className="text-xs text-slate-400 mt-1">Order #{order.id.slice(-6).toUpperCase()}</div>
+                  </div>
+                  {order.isModified && status === 'requested' && (
+                    <span className="bg-blue-500 text-white text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider ml-2">
+                      Modified
+                    </span>
+                  )}
                 </div>
                 <span className="text-sm font-medium bg-slate-700 px-2 py-1 rounded">
                   {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}

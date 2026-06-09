@@ -110,15 +110,25 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     if (mode === 'create') {
       createOrder(tableNumber, cartItems, totalCost);
     } else {
-      // Modifying logic: The prompt states complex modification rules.
-      // If items removed -> keep order in same queue position.
-      // If items added -> treat as second order.
-      // For simplicity in this demo, if it's modifying, we'll just update the first active order's items and set it back to requested,
-      // OR we create a new order for the diff.
-      // The prompt actually says: "If confirm changes button is clicked, the order should again get a status of 'Requested'".
-      // We will just update the primary existing order.
       const primaryOrder = existingOrders[0];
-      updateOrderItems(primaryOrder.id, cartItems, totalCost);
+      let itemsAdded = false;
+
+      for (const newItem of cartItems) {
+        // Find by menuItemId and instructions instead of just id, or just use id since we keep the same id when loading?
+        // Wait, the modal loads existing items with their existing IDs. So matching by id works for existing,
+        // and new items get a new random ID which won't match anyway.
+        const oldItem = primaryOrder.items.find(i => i.id === newItem.id);
+        if (!oldItem || newItem.quantity > oldItem.quantity) {
+          itemsAdded = true;
+          break;
+        }
+      }
+
+      if (itemsAdded) {
+        updateOrderItems(primaryOrder.id, cartItems, totalCost, 'requested', true);
+      } else {
+        updateOrderItems(primaryOrder.id, cartItems, totalCost, primaryOrder.status, primaryOrder.isModified || false);
+      }
     }
     onClose();
   };

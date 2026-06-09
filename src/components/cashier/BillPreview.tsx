@@ -8,20 +8,23 @@ import { Printer, Check } from 'lucide-react';
 interface BillPreviewProps {
   isOpen: boolean;
   onClose: () => void;
-  order: Order | null;
+  orders: Order[] | null;
   restaurantName: string;
-  onMarkPaid: (orderId: string) => Promise<void>;
+  onMarkPaid: (orderIds: string[]) => Promise<void>;
 }
 
-export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order, restaurantName, onMarkPaid }) => {
+export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orders, restaurantName, onMarkPaid }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
-  if (!order || !isOpen) return null;
+  if (!orders || orders.length === 0 || !isOpen) return null;
 
-  const subtotal = order.total;
+  // Aggregate items from all orders
+  const allItems = orders.flatMap(o => o.items);
+  const subtotal = orders.reduce((sum, o) => sum + o.total, 0);
   const cgst = subtotal * 0.025;
   const sgst = subtotal * 0.025;
   const grandTotal = subtotal + cgst + sgst;
+  const tableNumber = orders[0].tableNumber;
 
   const handlePrint = () => {
     // In a real app, this would use window.print() and CSS @media print
@@ -41,12 +44,12 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
 
           <div className="flex justify-between mb-4 text-xs border-b border-dashed border-slate-300 pb-4">
             <div>
-              <p>Table: <span className="font-bold">{order.tableNumber}</span></p>
-              <p>Order: #{order.id.slice(-6).toUpperCase()}</p>
+              <p>Table: <span className="font-bold">{tableNumber}</span></p>
+              <p>Orders: {orders.length}</p>
             </div>
             <div className="text-right">
-              <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-              <p>Time: {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+              <p>Date: {new Date().toLocaleDateString()}</p>
+              <p>Time: {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
             </div>
           </div>
 
@@ -56,8 +59,8 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
               <span className="w-12 text-center">Qty</span>
               <span className="w-20 text-right">Amt</span>
             </div>
-            {order.items.map(item => (
-              <div key={item.id} className="flex justify-between mb-1">
+            {allItems.map((item, index) => (
+              <div key={`${item.id}-${index}`} className="flex justify-between mb-1">
                 <span className="flex-1 truncate pr-2">{item.name}</span>
                 <span className="w-12 text-center">{item.quantity}</span>
                 <span className="w-20 text-right">{(item.price * item.quantity).toFixed(2)}</span>
@@ -98,7 +101,7 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
           <Button 
             className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white"
             onClick={() => {
-              onMarkPaid(order.id);
+              onMarkPaid(orders.map(o => o.id));
               onClose();
             }}
           >

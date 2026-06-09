@@ -11,7 +11,7 @@ interface OrderStore {
   subscribeToOrders: () => () => void;
   createOrder: (tableNumber: number, items: Order['items'], total: number) => Promise<void>;
   updateOrderStatus: (orderId: string, status: OrderStatus, reason?: string) => Promise<void>;
-  updateOrderItems: (orderId: string, items: Order['items'], total: number) => Promise<void>;
+  updateOrderItems: (orderId: string, items: Order['items'], total: number, newStatus?: OrderStatus, isModified?: boolean) => Promise<void>;
   deleteOrder: (orderId: string) => Promise<void>;
   markStatusSeen: (status: string) => void;
 }
@@ -63,13 +63,14 @@ export const useOrderStore = create<OrderStore>()(
           console.error("Error updating order status:", error);
         }
       },
-      updateOrderItems: async (orderId, items, total) => {
+      updateOrderItems: async (orderId, items, total, newStatus = 'requested', isModified = true) => {
         try {
           const orderRef = doc(db, 'orders', orderId);
           await updateDoc(orderRef, {
             items,
             total,
-            status: 'requested',
+            status: newStatus,
+            isModified,
             updatedAt: Date.now()
           });
         } catch (error) {
