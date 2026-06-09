@@ -19,7 +19,17 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
   if (!orders || orders.length === 0 || !isOpen) return null;
 
   // Aggregate items from all orders
-  const allItems = orders.flatMap(o => o.items);
+  const rawItems = orders.flatMap(o => o.items);
+  const allItems = Object.values(rawItems.reduce((acc, item) => {
+    const key = `${item.menuItemId}-${item.instructions || ''}`;
+    if (!acc[key]) {
+      acc[key] = { ...item };
+    } else {
+      acc[key].quantity += item.quantity;
+    }
+    return acc;
+  }, {} as Record<string, typeof rawItems[0]>) || {});
+
   const subtotal = orders.reduce((sum, o) => sum + o.total, 0);
   const cgst = subtotal * 0.025;
   const sgst = subtotal * 0.025;

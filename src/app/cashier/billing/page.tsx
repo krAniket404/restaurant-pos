@@ -94,8 +94,28 @@ export default function CashierBillingPage() {
         orders={selectedOrders}
         restaurantName={restaurantName}
         onMarkPaid={async (orderIds) => {
-          for (const id of orderIds) {
-            await updateOrderStatus(id, 'paid');
+          if (selectedOrders && selectedOrders.length > 0) {
+            const primaryOrder = selectedOrders[0];
+            const allItems = selectedOrders.flatMap(o => o.items);
+            const mergedItems = Object.values(allItems.reduce((acc, item) => {
+              const key = `${item.menuItemId}-${item.instructions || ''}`;
+              if (!acc[key]) {
+                acc[key] = { ...item };
+              } else {
+                acc[key].quantity += item.quantity;
+              }
+              return acc;
+            }, {} as Record<string, typeof allItems[0]>) || {});
+            
+            const total = selectedOrders.reduce((sum, o) => sum + o.total, 0);
+
+            // Update primary order to contain all aggregated items and total, and set status to paid
+            await useOrderStore.getState().updateOrderItems(primaryOrder.id, mergedItems, total, 'paid', false);
+
+            // Delete the rest of the merged orders
+            for (let i = 1; i < selectedOrders.length; i++) {
+              await useOrderStore.getState().deleteOrder(selectedOrders[i].id);
+            }
           }
         }}
       />
