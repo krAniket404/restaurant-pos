@@ -97,7 +97,7 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
                   </Button>
                 )}
 
-                {status !== 'served' && (
+                {(status === 'requested' || status === 'in_queue' || status === 'on_hold') && (
                   <div className={(status === 'in_queue' || status === 'requested') ? "flex space-x-2" : ""}>
                     {(status === 'in_queue' || status === 'requested') && (
                       <Button
