@@ -66,16 +66,11 @@ export default function WaiterDashboard() {
   };
 
   const handleCancelOrder = async () => {
-    // Logic to cancel order (requires specific order ID if multiple, but let's assume canceling all active for now or single active)
-    const { updateOrderStatus } = useOrderStore.getState();
+    const { deleteOrder } = useOrderStore.getState();
     if (activeOrders.length > 0) {
       if (window.confirm('Are you sure you want to cancel the order(s) for this table?')) {
         for (const order of activeOrders) {
-          // In real app, deleting or marking as cancelled. For now, mark as 'paid' to clear it, or add 'cancelled' status. 
-          // Since prompt says "order should be cancelled and associated table freed", let's just delete them or mark paid.
-          // Wait, 'paid' is for cashier. Let's add 'cancelled' or just delete.
-          // Due to time, let's just delete or use a pseudo-status.
-          // Wait, order workflow only mentioned 'paid'. Let's delete it for simplicity or use updateOrderStatus to 'cancelled' (need to add to types).
+          deleteOrder(order.id);
         }
         setIsActionModalOpen(false);
       }

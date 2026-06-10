@@ -10,7 +10,7 @@ interface BillPreviewProps {
   onClose: () => void;
   orders: Order[] | null;
   restaurantName: string;
-  onMarkPaid: (orderIds: string[]) => Promise<void>;
+  onMarkPaid?: (orderIds: string[]) => Promise<void>;
 }
 
 export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orders, restaurantName, onMarkPaid }) => {
@@ -21,7 +21,7 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
   // Aggregate items from all orders
   const rawItems = orders.flatMap(o => o.items);
   const allItems = Object.values(rawItems.reduce((acc, item) => {
-    const key = `${item.menuItemId}-${item.instructions || ''}`;
+    const key = `${item.menuItemId}-${(item.instructions || []).join('|')}`;
     if (!acc[key]) {
       acc[key] = { ...item };
     } else {
@@ -108,15 +108,17 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
           <Button variant="secondary" onClick={handlePrint} className="flex-1 flex items-center justify-center bg-slate-100 text-slate-700 hover:bg-slate-200">
             <Printer className="w-4 h-4 mr-2" /> Print Bill
           </Button>
-          <Button 
-            className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => {
-              onMarkPaid(orders.map(o => o.id));
-              onClose();
-            }}
-          >
-            <Check className="w-4 h-4 mr-2" /> Mark as Paid
-          </Button>
+          {onMarkPaid && (
+            <Button 
+              className="flex-1 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => {
+                onMarkPaid(orders.map(o => o.id));
+                onClose();
+              }}
+            >
+              <Check className="w-4 h-4 mr-2" /> Mark as Paid
+            </Button>
+          )}
         </div>
 
         {/* Global style to hide everything except receipt on print */}

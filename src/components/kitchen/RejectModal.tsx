@@ -8,7 +8,7 @@ interface RejectModalProps {
   onClose: () => void;
   orderId: string;
   onConfirm: (reason: string) => Promise<void>;
-  items: { name: string }[];
+  items: { name: string; instructions?: string[] }[];
 }
 
 export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, orderId, onConfirm, items }) => {
@@ -33,6 +33,8 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
       finalReason = `Ingredient out of stock: ${customReason}`;
     } else if (reasonCategory === 'Other (specify below)') {
       finalReason = `Other: ${customReason}`;
+    } else if (reasonCategory === 'Custom request not feasible') {
+      finalReason = `Custom request not feasible: ${subSelection}`;
     }
 
     onConfirm(finalReason);
@@ -100,13 +102,29 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
           </div>
         )}
 
+        {reasonCategory === 'Custom request not feasible' && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+            <label className="text-sm font-semibold text-slate-700">Which custom request?</label>
+            <select 
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500"
+              value={subSelection}
+              onChange={(e) => setSubSelection(e.target.value)}
+            >
+              <option value="" disabled>Select the instruction...</option>
+              {Array.from(new Set(items.flatMap(i => i.instructions || []).filter(Boolean))).map(inst => (
+                <option key={inst} value={inst}>{inst}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="flex items-center space-x-3 pt-4 border-t mt-6">
           <Button variant="secondary" onClick={onClose} className="flex-1">Cancel</Button>
           <Button 
             variant="danger" 
             onClick={handleConfirm} 
             className="flex-1"
-            disabled={!reasonCategory || loading || (reasonCategory === 'Item not available' && !subSelection) || (reasonCategory === 'Ingredient out of stock' && !customReason) || (reasonCategory === 'Other (specify below)' && !customReason)}
+            disabled={!reasonCategory || loading || (reasonCategory === 'Item not available' && !subSelection) || (reasonCategory === 'Ingredient out of stock' && !customReason) || (reasonCategory === 'Other (specify below)' && !customReason) || (reasonCategory === 'Custom request not feasible' && !subSelection)}
           >
             Confirm Hold
           </Button>

@@ -35,14 +35,16 @@ export default function CashierBillingPage() {
     const total = tableOrders.reduce((sum, o) => sum + o.total, 0);
     const itemsCount = tableOrders.reduce((sum, o) => sum + o.items.length, 0);
     const earliestTime = Math.min(...tableOrders.map(o => o.createdAt));
+    const latestServeTime = Math.max(...tableOrders.map(o => o.updatedAt));
     return {
       tableNumber,
       orders: tableOrders,
       total,
       itemsCount,
-      earliestTime
+      earliestTime,
+      latestServeTime
     };
-  });
+  }).sort((a, b) => a.latestServeTime - b.latestServeTime);
 
   return (
     <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50">
@@ -98,7 +100,7 @@ export default function CashierBillingPage() {
             const primaryOrder = selectedOrders[0];
             const allItems = selectedOrders.flatMap(o => o.items);
             const mergedItems = Object.values(allItems.reduce((acc, item) => {
-              const key = `${item.menuItemId}-${item.instructions || ''}`;
+              const key = `${item.menuItemId}-${(item.instructions || []).join('|')}`;
               if (!acc[key]) {
                 acc[key] = { ...item };
               } else {

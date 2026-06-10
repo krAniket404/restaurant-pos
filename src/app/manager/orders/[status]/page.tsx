@@ -69,7 +69,9 @@ export default function KitchenOrdersPage({ params }: { params: Promise<{ status
                         <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-xs h-fit">{item.quantity}x</span>
                         <div className="flex flex-col">
                           <span className="text-slate-700 font-medium">{item.name}</span>
-                          {item.instructions && <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mt-1 inline-block">Note: {item.instructions}</span>}
+                          {(item.instructions || []).map((inst, idx) => (
+                            <span key={idx} className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded mt-1 inline-block w-fit">Note: {inst}</span>
+                          ))}
                         </div>
                       </div>
                     </div>

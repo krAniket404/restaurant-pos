@@ -10,11 +10,6 @@ export default defineType({
       title: 'Table Number',
       type: 'number',
       validation: (Rule) => Rule.required().integer().positive(),
-    }),
-    defineField({
-      name: 'capacity',
-      title: 'Capacity',
-      type: 'number',
-    }),
+    })
   ],
 });

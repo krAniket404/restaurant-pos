@@ -13,7 +13,7 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  instructions?: string;
+  instructions?: string[];
 }
 
 export interface Order {

@@ -62,7 +62,9 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
                         <span className="font-semibold text-orange-600">{item.quantity}x</span>
                         <div className="flex flex-col">
                           <span className="text-slate-700 font-medium">{item.name}</span>
-                          {item.instructions && <span className="text-xs text-slate-500 italic">Note: {item.instructions}</span>}
+                          {(item.instructions || []).map((inst, idx) => (
+                            <span key={idx} className="text-xs text-slate-500 italic">Note: {inst}</span>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -76,36 +78,54 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
                         <span className="font-semibold">Reason:</span> {order.holdReason}
                       </div>
                     )}
-                    <div className="flex space-x-3 w-full">
-                      <Button 
-                        variant="outline"
-                        className="flex-1 border-red-200 hover:bg-red-50 hover:text-red-700 text-slate-700"
-                        onClick={() => setModifyingOrder(order)}
-                      >
-                        Modify
-                      </Button>
-                      <Button 
-                        variant="danger"
-                        className="flex-1"
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to cancel this order?")) {
-                            deleteOrder(order.id);
-                          }
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="outline"
+                      className="w-full border-red-200 hover:bg-red-50 hover:text-red-700 text-slate-700"
+                      onClick={() => setModifyingOrder(order)}
+                    >
+                      Modify
+                    </Button>
                   </div>
                 )}
 
                 {status === 'prepared' && (
                   <Button 
-                    className="w-full"
+                    className="w-full mb-3"
                     onClick={() => updateOrderStatus(order.id, 'served')}
                   >
                     Mark Served
                   </Button>
+                )}
+
+                {status !== 'served' && (
+                  <div className={(status === 'in_queue' || status === 'requested') ? "flex space-x-2" : ""}>
+                    {(status === 'in_queue' || status === 'requested') && (
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-blue-200 hover:bg-blue-50 hover:text-blue-700 text-slate-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setModifyingOrder(order);
+                        }}
+                      >
+                        Modify
+                      </Button>
+                    )}
+                    <Button 
+                      variant="danger"
+                      className={(status === 'in_queue' || status === 'requested') ? "flex-1 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100" : "w-full border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (window.confirm("Are you sure you want to cancel this order?")) {
+                          await deleteOrder(order.id);
+                        }
+                      }}
+                    >
+                      Cancel Order
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

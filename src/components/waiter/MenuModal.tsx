@@ -69,7 +69,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     };
     // If it's a completely new addition to the same item, just increase qty?
     // Zomato usually groups them unless instructions differ. Let's group for simplicity.
-    const existing = cartItems.find(i => i.menuItemId === item._id && !i.instructions);
+    const existing = cartItems.find(i => i.menuItemId === item._id && (!i.instructions || i.instructions.length === 0));
     if (existing) {
       setCartItems(cartItems.map(i => i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
@@ -97,10 +97,37 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     }
   };
 
-  const updateInstructions = (id: string, text: string) => {
-    setCartItems(cartItems.map(item =>
-      item.id === id ? { ...item, instructions: text } : item
-    ));
+  const updateInstruction = (id: string, index: number, text: string) => {
+    setCartItems(cartItems.map(item => {
+      if (item.id === id) {
+        const newInstructions = [...(item.instructions || [])];
+        newInstructions[index] = text;
+        return { ...item, instructions: newInstructions };
+      }
+      return item;
+    }));
+    setHasModifications(true);
+  };
+
+  const addInstruction = (id: string) => {
+    setCartItems(cartItems.map(item => {
+      if (item.id === id) {
+        return { ...item, instructions: [...(item.instructions || []), ''] };
+      }
+      return item;
+    }));
+    setHasModifications(true);
+  };
+
+  const removeInstruction = (id: string, index: number) => {
+    setCartItems(cartItems.map(item => {
+      if (item.id === id) {
+        const newInstructions = [...(item.instructions || [])];
+        newInstructions.splice(index, 1);
+        return { ...item, instructions: newInstructions };
+      }
+      return item;
+    }));
     setHasModifications(true);
   };
 
@@ -114,11 +141,9 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     } else {
       const primaryOrder = existingOrders[0];
       let itemsAdded = false;
+      let itemsRemoved = false;
 
       for (const newItem of cartItems) {
-        // Find by menuItemId and instructions instead of just id, or just use id since we keep the same id when loading?
-        // Wait, the modal loads existing items with their existing IDs. So matching by id works for existing,
-        // and new items get a new random ID which won't match anyway.
         const oldItem = primaryOrder.items.find(i => i.id === newItem.id);
         if (!oldItem || newItem.quantity > oldItem.quantity) {
           itemsAdded = true;
@@ -126,7 +151,17 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         }
       }
 
+      for (const oldItem of primaryOrder.items) {
+        const newItem = cartItems.find(i => i.id === oldItem.id);
+        if (!newItem || newItem.quantity < oldItem.quantity) {
+          itemsRemoved = true;
+          break;
+        }
+      }
+
       if (itemsAdded) {
+        updateOrderItems(primaryOrder.id, cartItems, totalCost, 'requested', true);
+      } else if (itemsRemoved && primaryOrder.status === 'on_hold') {
         updateOrderItems(primaryOrder.id, cartItems, totalCost, 'requested', true);
       } else {
         updateOrderItems(primaryOrder.id, cartItems, totalCost, primaryOrder.status, primaryOrder.isModified || false);
@@ -163,13 +198,25 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                         <span className="font-medium text-slate-800">{item.name}</span>
                         <span className="font-semibold text-orange-600">₹{item.price * item.quantity}</span>
                       </div>
-                      <input
-                        type="text"
-                        placeholder="Add cooking instructions..."
-                        className="text-sm bg-slate-50 border-none outline-none mt-2 w-full p-2 rounded-lg text-slate-600 focus:ring-1 focus:ring-orange-300"
-                        value={item.instructions || ''}
-                        onChange={(e) => updateInstructions(item.id, e.target.value)}
-                      />
+                      <div className="mt-2 space-y-2">
+                        {(item.instructions || []).map((inst, idx) => (
+                          <div key={idx} className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              placeholder="Add cooking instructions..."
+                              className="text-sm bg-slate-50 border-none outline-none w-full p-2 rounded-lg text-slate-600 focus:ring-1 focus:ring-orange-300"
+                              value={inst}
+                              onChange={(e) => updateInstruction(item.id, idx, e.target.value)}
+                            />
+                            <button onClick={() => removeInstruction(item.id, idx)} className="text-slate-400 hover:text-red-500">
+                              <Minus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                        <button onClick={() => addInstruction(item.id)} className="text-xs font-medium text-orange-600 hover:text-orange-700 flex items-center">
+                          <Plus className="w-3 h-3 mr-1" /> Add Instruction
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center bg-slate-100 rounded-lg p-1">

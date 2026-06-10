@@ -5,11 +5,19 @@ import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Modal } from '../../../components/ui/Modal';
 import { Order } from '../../../types';
-import { CheckCircle, Eye } from 'lucide-react';
+import { CheckCircle, Eye, Printer } from 'lucide-react';
+import { BillPreview } from '../../../components/cashier/BillPreview';
 
 export default function CashierPaidPage() {
   const { orders } = useOrderStore();
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
+  const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
+
+  React.useEffect(() => {
+    import('../../../lib/sanity/client').then(({ fetchRestaurantDetails }) => {
+      fetchRestaurantDetails().then(res => { if (res?.name) setRestaurantName(res.name); }).catch(console.error);
+    });
+  }, []);
 
   // Filter for 'paid' status and today's date
   const todayStart = new Date();
@@ -50,12 +58,19 @@ export default function CashierPaidPage() {
                   <p className="text-xs text-slate-400 mt-1">{order.items.length} items</p>
                 </div>
               </div>
-              <CardContent className="p-6 mt-auto">
+              <CardContent className="p-6 mt-auto flex space-x-3">
                 <Button 
-                  className="w-full bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 shadow-none font-semibold"
+                  className="flex-1 bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 shadow-none font-semibold"
                   onClick={() => setViewingOrder(order)}
                 >
                   Paid <span className="ml-2 font-serif text-lg">₹</span>
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex-none px-4"
+                  onClick={() => setViewingOrder(order)}
+                >
+                  <Printer className="w-5 h-5 text-slate-600" />
                 </Button>
               </CardContent>
             </Card>
@@ -64,31 +79,12 @@ export default function CashierPaidPage() {
       )}
 
       {/* View Order Modal */}
-      <Modal isOpen={!!viewingOrder} onClose={() => setViewingOrder(null)} title={`Order Details - Table ${viewingOrder?.tableNumber}`}>
-        {viewingOrder && (
-          <div className="space-y-4">
-            <div className="flex justify-between text-sm text-slate-500 border-b pb-2">
-              <span>Order #{viewingOrder.id}</span>
-              <span>{new Date(viewingOrder.updatedAt).toLocaleString()}</span>
-            </div>
-            <div className="space-y-3">
-              {viewingOrder.items.map(item => (
-                <div key={item.id} className="flex justify-between items-center text-sm border-b border-slate-100 pb-2 last:border-0">
-                  <div className="flex space-x-3">
-                    <span className="font-bold text-slate-800 bg-slate-100 px-2 rounded">{item.quantity}x</span>
-                    <span className="text-slate-700">{item.name}</span>
-                  </div>
-                  <span className="font-medium">₹{item.price * item.quantity}</span>
-                </div>
-              ))}
-            </div>
-            <div className="pt-4 border-t flex justify-between items-center font-bold text-lg">
-              <span>Total Paid</span>
-              <span className="text-green-600">₹{viewingOrder.total}</span>
-            </div>
-          </div>
-        )}
-      </Modal>
+      <BillPreview
+        isOpen={!!viewingOrder}
+        onClose={() => setViewingOrder(null)}
+        orders={viewingOrder ? [viewingOrder] : null}
+        restaurantName={restaurantName}
+      />
     </div>
   );
 }

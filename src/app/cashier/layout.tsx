@@ -18,6 +18,11 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
   const { user, logout } = useAuthStore();
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -28,20 +33,26 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
   }, [pathname, markStatusSeen]);
 
   useEffect(() => {
-    if (!user || user.role !== 'cashier') {
-      router.push('/');
+    if (mounted) {
+      if (!user || user.role !== 'cashier') {
+        router.push('/');
+      }
     }
     const unsub = subscribeToOrders();
     return () => unsub();
-  }, [user, router, subscribeToOrders]);
+  }, [user, router, subscribeToOrders, mounted]);
 
-  if (!user) return null;
+  if (!mounted || !user || user.role !== 'cashier') return null;
 
   const validStatuses = navItems.map(item => item.status).filter(Boolean);
-  const pendingCount = orders.filter(o => 
-    validStatuses.includes(o.status) && 
-    o.updatedAt > (lastSeen[o.status] || 0)
-  ).length;
+  const pendingCount = orders.filter(o => {
+    if (!validStatuses.includes(o.status)) return false;
+    if (o.status === 'paid') {
+      const todayStart = new Date().setHours(0, 0, 0, 0);
+      return o.updatedAt > (lastSeen[o.status] || 0) && o.updatedAt >= todayStart;
+    }
+    return o.updatedAt > (lastSeen[o.status] || 0);
+  }).length;
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 relative">
@@ -68,7 +79,9 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            const count = orders.filter(o => o.status === item.status).length;
+            const count = item.status === 'paid' 
+              ? orders.filter(o => o.status === 'paid' && o.updatedAt >= new Date().setHours(0,0,0,0)).length
+              : orders.filter(o => o.status === item.status).length;
             return (
               <Link 
                 key={item.href} 

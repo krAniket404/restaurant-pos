@@ -33,6 +33,11 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   const { user, logout } = useAuthStore();
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setIsSidebarOpen(false);
@@ -43,14 +48,16 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   }, [pathname, markStatusSeen]);
 
   useEffect(() => {
-    if (!user || user.role !== 'waiter') {
-      router.push('/');
+    if (mounted) {
+      if (!user || user.role !== 'waiter') {
+        router.push('/');
+      }
     }
     const unsub = subscribeToOrders();
     return () => unsub();
-  }, [user, router, subscribeToOrders]);
+  }, [user, router, subscribeToOrders, mounted]);
 
-  if (!user) return null;
+  if (!mounted || !user || user.role !== 'waiter') return null;
 
   const validStatuses = navItems.map(item => item.countStatus).filter(Boolean);
   const unseenCount = orders.filter(o => 

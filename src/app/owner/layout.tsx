@@ -18,6 +18,11 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuthStore();
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -27,14 +32,16 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   }, [pathname, markStatusSeen]);
 
   useEffect(() => {
-    if (!user || user.role !== 'owner') {
-      router.push('/');
+    if (mounted) {
+      if (!user || user.role !== 'owner') {
+        router.push('/');
+      }
     }
     const unsub = subscribeToOrders();
     return () => unsub();
-  }, [user, router, subscribeToOrders]);
+  }, [user, router, subscribeToOrders, mounted]);
 
-  if (!user) return null;
+  if (!mounted || !user || user.role !== 'owner') return null;
 
   const unseenCount = orders.filter(o => o.updatedAt > (lastSeen['all'] || 0)).length;
 

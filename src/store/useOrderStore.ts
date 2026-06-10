@@ -26,7 +26,7 @@ export const useOrderStore = create<OrderStore>()(
         lastSeen: { ...state.lastSeen, [status]: Date.now() }
       })),
       subscribeToOrders: () => {
-        const q = query(collection(db, 'orders'), orderBy('createdAt', 'asc'));
+        const q = query(collection(db, 'orders'), orderBy('updatedAt', 'asc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
           const ordersData = snapshot.docs.map(doc => ({
             id: doc.id,
