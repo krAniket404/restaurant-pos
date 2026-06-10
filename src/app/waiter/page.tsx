@@ -91,7 +91,6 @@ export default function WaiterDashboard() {
             )}
           >
             <span className="text-4xl font-bold mb-2">{table.tableNumber}</span>
-            {table.capacity && <span className="text-sm opacity-70">Capacity: {table.capacity}</span>}
           </button>
         ))}
       </div>
