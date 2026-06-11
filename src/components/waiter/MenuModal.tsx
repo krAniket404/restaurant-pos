@@ -185,7 +185,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col sm:p-4">
+    <div className="fixed inset-x-0 top-0 h-[100dvh] z-50 bg-slate-50 flex flex-col sm:p-4">
       <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b" ref={topRef}>
@@ -198,7 +198,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </div>
 
         {/* Content Area - Cart at Top, Menu Below */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative p-4 sm:p-6 pb-32" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto no-scrollbar relative p-4 sm:p-6" ref={scrollRef}>
 
           {/* Current Cart Items */}
           {cartItems.length > 0 && (
@@ -321,7 +321,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </div>
 
         {/* Bottom Bar Actions */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t p-4 sm:p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between">
+        <div className="bg-white border-t p-4 sm:p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between z-10 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="flex flex-col">
             <span className="text-sm text-slate-500">Total Amount</span>
             <span className="text-2xl font-bold text-slate-800">₹{totalCost}</span>
@@ -349,7 +349,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         {/* Jump to top button */}
         <button
           onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="absolute bottom-28 right-6 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-700 transition-colors z-20"
+          className="absolute bottom-24 right-6 bg-slate-800 text-white p-3 rounded-full shadow-xl hover:bg-slate-700 transition-colors z-20"
         >
           <ArrowUp className="w-5 h-5" />
         </button>

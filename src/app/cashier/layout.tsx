@@ -107,7 +107,7 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
 
   return (
     <div 
-      className="flex h-screen overflow-hidden bg-slate-50 relative"
+      className="flex h-[100dvh] overflow-hidden bg-slate-50 relative"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
