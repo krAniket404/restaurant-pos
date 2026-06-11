@@ -11,5 +11,13 @@ export default defineType({
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: 'tables',
+      title: 'Total Tables',
+      description: 'Total number of tables available in the restaurant.',
+      type: 'number',
+      validation: (Rule) => Rule.required().integer().positive(),
+    }),
   ],
 });
+

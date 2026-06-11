@@ -28,11 +28,12 @@ export const fetchCategories = async () => {
 };
 
 export const fetchTables = async () => {
-  return client.fetch(`*[_type == "table"] | order(tableNumber asc) {
-    _id,
-    tableNumber,
-    capacity
-  }`);
+  const restaurant = await client.fetch(`*[_type == "restaurant"][0]{tables}`);
+  const numberOfTables: number = restaurant?.tables || 0;
+  return Array.from({ length: numberOfTables }, (_, i) => ({
+    _id: `table-${i + 1}`,
+    tableNumber: i + 1,
+  }));
 };
 
 export const fetchUsers = async () => {
