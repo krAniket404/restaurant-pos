@@ -104,7 +104,6 @@ export default function WaiterDashboard() {
           <Button
             size="lg"
             onClick={handleCreateOrder}
-            disabled={activeOrders.some(o => ['on_hold', 'requested', 'in_queue'].includes(o.status))}
           >
             Create New Order
           </Button>

@@ -11,7 +11,8 @@ import {
   CheckCircle, 
   Utensils, 
   LogOut,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { cn } from '../../components/ui/Button';
@@ -34,13 +35,47 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [popupOrder, setPopupOrder] = useState<any>(null);
+  const [notifiedOrders, setNotifiedOrders] = useState<Set<string>>(new Set());
+  const mountTime = React.useRef(Date.now());
+
+  // Swipe gesture states
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = navItems.findIndex(item => item.href === pathname);
+      if (currentIndex === -1) return;
+
+      if (isLeftSwipe && currentIndex > 0) {
+        router.push(navItems[currentIndex - 1].href);
+      } else if (isRightSwipe && currentIndex < navItems.length - 1) {
+        router.push(navItems[currentIndex + 1].href);
+      }
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    setIsSidebarOpen(false);
     const activeItem = navItems.find(item => item.href === pathname);
     if (activeItem && activeItem.countStatus) {
       markStatusSeen(activeItem.countStatus);
@@ -57,6 +92,27 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
     return () => unsub();
   }, [user, router, subscribeToOrders, mounted]);
 
+  useEffect(() => {
+    const newPopupOrders = orders.filter(o => 
+      (o.status === 'on_hold' || o.status === 'prepared') && 
+      o.updatedAt > mountTime.current && 
+      !notifiedOrders.has(`${o.id}-${o.status}-${o.updatedAt}`)
+    );
+
+    if (newPopupOrders.length > 0 && !popupOrder) {
+      setPopupOrder(newPopupOrders[0]);
+    }
+  }, [orders, notifiedOrders, popupOrder]);
+
+  useEffect(() => {
+    if (popupOrder) {
+      const currentOrder = orders.find(o => o.id === popupOrder.id);
+      if (!currentOrder || currentOrder.status !== popupOrder.status) {
+        setPopupOrder(null);
+      }
+    }
+  }, [orders, popupOrder]);
+
   if (!mounted || !user || user.role !== 'waiter') return null;
 
   const validStatuses = navItems.map(item => item.countStatus).filter(Boolean);
@@ -66,19 +122,29 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   ).length;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
+    <div 
+      className="flex h-screen overflow-hidden bg-slate-50 relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-          onClick={() => setIsSidebarOpen(false)}
         />
       )}
       <aside className={cn(
         "fixed inset-y-0 left-0 bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl z-50 w-72 transform transition-transform duration-300 ease-in-out",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-          <div className="flex items-center space-x-4 mb-1">
+        <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative">
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute top-6 right-4 text-slate-400 hover:text-rose-400 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="flex items-center space-x-4 mb-1 pr-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg">
               <Utensils className="w-6 h-6 text-white" />
             </div>
@@ -152,6 +218,68 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
           {children}
         </div>
       </main>
+
+      {popupOrder && (
+        <div 
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-white rounded-2xl shadow-2xl border-2 border-rose-500 p-4 w-[90%] max-w-md animate-in slide-in-from-top-10 fade-in duration-300 cursor-pointer hover:bg-rose-50 transition-colors"
+          onClick={() => {
+            router.push(`/waiter/orders/${popupOrder.status}`);
+            setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
+            setPopupOrder(null);
+          }}
+        >
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-lg font-bold text-slate-800">
+              Order {popupOrder.status === 'on_hold' ? 'On Hold' : 'Ready'} - Table {popupOrder.tableNumber}
+            </h3>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
+                setPopupOrder(null);
+              }} 
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="text-sm text-slate-600 mb-4 max-h-32 overflow-y-auto">
+            {popupOrder.status === 'on_hold' && popupOrder.holdReason && (
+               <div className="text-red-500 mb-2 font-medium">Reason: {popupOrder.holdReason}</div>
+            )}
+            {popupOrder.items.map((item: any, idx: number) => (
+              <div key={idx} className="flex flex-col border-b border-slate-100 py-2 last:border-0">
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-800">{item.quantity}x {item.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <button 
+              className="flex-1 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
+                setPopupOrder(null);
+              }}
+            >
+              Dismiss
+            </button>
+            <button 
+              className="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
+                router.push(`/waiter/orders/${popupOrder.status}`);
+                setPopupOrder(null);
+              }}
+            >
+              View Order
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

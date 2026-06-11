@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { History, BarChart3, LogOut, Menu } from 'lucide-react';
+import { History, BarChart3, LogOut, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useOrderStore } from '../../store/useOrderStore';
 import { cn } from '../../components/ui/Button';
@@ -20,12 +20,43 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // Swipe gesture states
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = navItems.findIndex(item => item.href === pathname);
+      if (currentIndex === -1) return;
+
+      if (isLeftSwipe && currentIndex > 0) {
+        router.push(navItems[currentIndex - 1].href);
+      } else if (isRightSwipe && currentIndex < navItems.length - 1) {
+        router.push(navItems[currentIndex + 1].href);
+      }
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    setSidebarOpen(false);
     if (pathname === '/owner') {
       markStatusSeen('all');
     }
@@ -46,19 +77,29 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const unseenCount = orders.filter(o => o.updatedAt > (lastSeen['all'] || 0)).length;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
+    <div 
+      className="flex h-screen overflow-hidden bg-slate-50 relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-          onClick={() => setSidebarOpen(false)}
         />
       )}
       <aside className={cn(
         "fixed inset-y-0 left-0 bg-indigo-900 text-slate-300 flex flex-col shadow-2xl z-50 w-64 transform transition-transform duration-300 ease-in-out",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-6 border-b border-indigo-800">
-          <h2 className="text-2xl font-bold text-white">Owner Panel</h2>
+        <div className="p-6 border-b border-indigo-800 relative">
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-6 right-4 text-indigo-300 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <h2 className="text-2xl font-bold text-white pr-8">Owner Panel</h2>
           <p className="text-sm text-indigo-300 capitalize mt-1">{user.username}</p>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">

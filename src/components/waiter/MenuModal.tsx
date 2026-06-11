@@ -26,7 +26,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
 
   const topRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { createOrder, updateOrderItems } = useOrderStore();
+  const { createOrder, updateOrderItems, deleteOrder } = useOrderStore();
 
   useEffect(() => {
     fetchCategories().then(setCategories).catch(console.error);
@@ -140,26 +140,40 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
       createOrder(tableNumber, cartItems, totalCost);
     } else {
       const primaryOrder = existingOrders[0];
+      
       let itemsAdded = false;
       let itemsRemoved = false;
+      let instructionsChanged = false;
+      
+      const allOldItems = existingOrders.flatMap(o => o.items);
 
       for (const newItem of cartItems) {
-        const oldItem = primaryOrder.items.find(i => i.id === newItem.id);
+        const oldItem = allOldItems.find(i => i.id === newItem.id);
         if (!oldItem || newItem.quantity > oldItem.quantity) {
           itemsAdded = true;
-          break;
+        }
+        if (oldItem) {
+          const oldInst = oldItem.instructions || [];
+          const newInst = newItem.instructions || [];
+          if (oldInst.length !== newInst.length || oldInst.some((inst, idx) => inst !== newInst[idx])) {
+            instructionsChanged = true;
+          }
         }
       }
 
-      for (const oldItem of primaryOrder.items) {
+      for (const oldItem of allOldItems) {
         const newItem = cartItems.find(i => i.id === oldItem.id);
         if (!newItem || newItem.quantity < oldItem.quantity) {
           itemsRemoved = true;
-          break;
         }
       }
 
-      if (itemsAdded) {
+      // Delete other orders to consolidate them into primaryOrder
+      for (let i = 1; i < existingOrders.length; i++) {
+        deleteOrder(existingOrders[i].id);
+      }
+
+      if (itemsAdded || instructionsChanged) {
         updateOrderItems(primaryOrder.id, cartItems, totalCost, 'requested', true);
       } else if (itemsRemoved && primaryOrder.status === 'on_hold') {
         updateOrderItems(primaryOrder.id, cartItems, totalCost, 'requested', true);
