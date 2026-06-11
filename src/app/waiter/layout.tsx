@@ -63,10 +63,10 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
       const currentIndex = navItems.findIndex(item => item.href === pathname);
       if (currentIndex === -1) return;
 
-      if (isLeftSwipe && currentIndex > 0) {
-        router.push(navItems[currentIndex - 1].href);
-      } else if (isRightSwipe && currentIndex < navItems.length - 1) {
+      if (isLeftSwipe && currentIndex < navItems.length - 1) {
         router.push(navItems[currentIndex + 1].href);
+      } else if (isRightSwipe && currentIndex > 0) {
+        router.push(navItems[currentIndex - 1].href);
       }
     }
   };
@@ -215,7 +215,9 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
           <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
         </header>
         <div className="flex-1 overflow-y-auto relative">
-          {children}
+          <div key={pathname} className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+            {children}
+          </div>
         </div>
       </main>
 
