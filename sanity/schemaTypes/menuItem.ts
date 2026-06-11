@@ -23,12 +23,7 @@ export default defineType({
       type: 'number',
       validation: (Rule) => Rule.required().min(0),
     }),
-    defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
-      options: { hotspot: true },
-    }),
+
     defineField({
       name: 'isVeg',
       title: 'Is Vegetarian?',

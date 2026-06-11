@@ -14,7 +14,6 @@ export const fetchMenuItems = async () => {
     price,
     isVeg,
     description,
-    "imageUrl": image.asset->url,
     category->{_id, title}
   }`);
 };
