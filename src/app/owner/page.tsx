@@ -83,7 +83,7 @@ export default function OwnerDashboard() {
                   </h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {dateOrders.map(order => (
-                      <Card key={order.id} className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white overflow-hidden group">
+                      <Card key={order.id} className="hover:shadow-md transition-shadow overflow-hidden group">
                         <div className="p-4 bg-slate-800 text-white flex justify-between items-center">
                           <span className="font-bold">Table {order.tableNumber}</span>
                           <span className="text-xs bg-slate-700 px-2 py-1 rounded">

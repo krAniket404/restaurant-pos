@@ -63,7 +63,7 @@ export default function CashierBillingPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {mergedTables.map(merged => (
-            <Card key={merged.tableNumber} className="border border-slate-200 shadow-sm flex flex-col hover:shadow-lg transition-shadow bg-white">
+            <Card key={merged.tableNumber} className="flex flex-col hover:shadow-lg transition-shadow">
               <div className="p-6 border-b flex justify-between items-start">
                 <div>
                   <h3 className="text-2xl font-bold text-slate-800">Table {merged.tableNumber}</h3>

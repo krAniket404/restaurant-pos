@@ -42,7 +42,7 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredOrders.map(order => (
-            <Card key={order.id} className="border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <Card key={order.id} className="hover:shadow-md transition-shadow">
               <div className="bg-slate-100 p-4 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div className="flex items-center space-x-3">
                   <span className="font-bold text-lg text-slate-800">Table {order.tableNumber}</span>

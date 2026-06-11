@@ -45,7 +45,7 @@ export default function CashierPaidPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {paidOrders.map(order => (
-            <Card key={order.id} className="border border-slate-200 shadow-sm flex flex-col bg-white">
+            <Card key={order.id} className="flex flex-col">
               <div className="p-6 border-b flex justify-between items-start">
                 <div>
                   <h3 className="text-2xl font-bold text-slate-800">Table {order.tableNumber}</h3>

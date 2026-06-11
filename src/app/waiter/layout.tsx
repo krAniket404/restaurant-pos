@@ -220,7 +220,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
         </div>
       </aside>
       <main className="flex-1 overflow-hidden flex flex-col relative w-full">
-        <header className="bg-white border-b px-6 py-4 flex items-center shadow-sm z-10 shrink-0">
+        <header className="bg-white px-6 py-4 flex items-center shadow-md z-10 shrink-0">
           <button 
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 -ml-2 mr-4 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors relative"

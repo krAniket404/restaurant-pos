@@ -140,11 +140,11 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
       createOrder(tableNumber, cartItems, totalCost);
     } else {
       const primaryOrder = existingOrders[0];
-      
+
       let itemsAdded = false;
       let itemsRemoved = false;
       let instructionsChanged = false;
-      
+
       const allOldItems = existingOrders.flatMap(o => o.items);
 
       for (const newItem of cartItems) {
@@ -188,7 +188,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     <div className="fixed inset-x-0 top-0 h-[100dvh] z-50 bg-slate-50 flex flex-col sm:p-4">
       <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b" ref={topRef}>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-black/25" ref={topRef}>
           <h2 className="text-2xl font-bold text-slate-800">
             {mode === 'create' ? 'New Order' : 'Modify Order'} - Table {tableNumber}
           </h2>
@@ -287,7 +287,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
           {/* Menu Items Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems.map(item => (
-              <div key={item._id} className="bg-white border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col">
+              <div key={item._id} className="bg-white shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col">
                 <div className="h-48 overflow-hidden relative bg-slate-100">
                   {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

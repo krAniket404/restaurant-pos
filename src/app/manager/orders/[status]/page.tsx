@@ -44,7 +44,7 @@ export default function KitchenOrdersPage({ params }: { params: Promise<{ status
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredOrders.map(order => (
-            <Card key={order.id} className="border border-slate-200 shadow-sm flex flex-col">
+            <Card key={order.id} className="flex flex-col">
               <div className="bg-slate-800 text-white p-4 border-b flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                   <div>
