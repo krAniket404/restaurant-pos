@@ -42,7 +42,7 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md bg-white">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md bg-white" position="top">
       <div className="flex flex-col h-full relative" ref={printRef}>
         
         {/* Printable Area - style for receipt look */}
