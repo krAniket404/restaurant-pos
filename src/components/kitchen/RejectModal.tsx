@@ -60,7 +60,7 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
           <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
             <label className="text-sm font-semibold text-slate-700">Which item is not available?</label>
             <select
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full p-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               value={subSelection}
               onChange={(e) => setSubSelection(e.target.value)}
             >
@@ -77,7 +77,7 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
             <label className="text-sm font-semibold text-slate-700">Which ingredient?</label>
             <input
               type="text"
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full p-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
               placeholder="e.g. Tomatoes"
@@ -89,7 +89,7 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
           <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
             <label className="text-sm font-semibold text-slate-700">Specify reason</label>
             <textarea
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full p-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
               placeholder="Enter reason..."
@@ -102,7 +102,7 @@ export const RejectModal: React.FC<RejectModalProps> = ({ isOpen, onClose, order
           <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
             <label className="text-sm font-semibold text-slate-700">Which custom request?</label>
             <select
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full p-3 bg-white border border-slate-100 rounded-2xl shadow-sm outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               value={subSelection}
               onChange={(e) => setSubSelection(e.target.value)}
             >

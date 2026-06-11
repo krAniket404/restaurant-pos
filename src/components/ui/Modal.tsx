@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       <div 
         className={cn("relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90dvh] flex flex-col transform transition-all", className)}
       >
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100">
           {title && <h2 className="text-xl font-bold">{title}</h2>}
           <button 
             onClick={onClose}

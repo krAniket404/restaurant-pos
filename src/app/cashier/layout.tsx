@@ -196,7 +196,7 @@ export default function CashierLayout({ children }: { children: React.ReactNode 
           <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
         </header>
         <div className="flex-1 overflow-y-auto relative">
-          <div key={pathname} ref={contentRef} className="h-full">
+          <div key={pathname} ref={contentRef} className="h-full pb-24">
             {children}
           </div>
         </div>

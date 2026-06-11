@@ -86,7 +86,7 @@ export default function WaiterDashboard() {
             key={table._id}
             onClick={() => handleTableClick(table)}
             className={cn(
-              "aspect-square rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-500/30",
+              "aspect-square rounded-3xl border flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm focus:outline-none focus:ring-4 focus:ring-rose-500/30",
               getTableColor(table.tableNumber)
             )}
           >
