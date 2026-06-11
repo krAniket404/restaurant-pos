@@ -14,6 +14,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import gsap from 'gsap';
 import { useAuthStore } from '../../store/useAuthStore';
 import { cn } from '../../components/ui/Button';
 import { useOrderStore } from '../../store/useOrderStore';
@@ -42,6 +43,8 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   // Swipe gesture states
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -64,8 +67,10 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
       if (currentIndex === -1) return;
 
       if (isLeftSwipe && currentIndex < navItems.length - 1) {
+        setSwipeDirection('left');
         router.push(navItems[currentIndex + 1].href);
       } else if (isRightSwipe && currentIndex > 0) {
+        setSwipeDirection('right');
         router.push(navItems[currentIndex - 1].href);
       }
     }
@@ -74,6 +79,21 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const xOffset = swipeDirection === 'left' ? 100 : swipeDirection === 'right' ? -100 : 0;
+      const initialY = swipeDirection ? 0 : 20;
+      
+      gsap.fromTo(contentRef.current, 
+        { opacity: 0, x: xOffset, y: initialY },
+        { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }
+      );
+      
+      const timer = setTimeout(() => setSwipeDirection(null), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const activeItem = navItems.find(item => item.href === pathname);
@@ -140,9 +160,9 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
         <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative">
           <button 
             onClick={() => setIsSidebarOpen(false)}
-            className="absolute top-6 right-4 text-slate-400 hover:text-rose-400 transition-colors"
+            className="absolute top-5 right-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 z-50"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" strokeWidth={3} />
           </button>
           <div className="flex items-center space-x-4 mb-1 pr-8">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg">
@@ -215,7 +235,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
           <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
         </header>
         <div className="flex-1 overflow-y-auto relative">
-          <div key={pathname} className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+          <div key={pathname} ref={contentRef} className="h-full">
             {children}
           </div>
         </div>
