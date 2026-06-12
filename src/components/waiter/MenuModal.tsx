@@ -187,7 +187,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   };
 
   return (
-    <div className="fixed inset-x-0 top-0 h-[100vh] z-50 bg-slate-50 flex flex-col sm:p-4">
+    <div className="fixed inset-x-0 top-0 h-[100dvh] z-50 bg-slate-50 flex flex-col sm:p-4">
       <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-black/25" ref={topRef}>
