@@ -44,6 +44,7 @@ export default function KitchenLayout({ children }: { children: React.ReactNode 
   };
 
   const onTouchEnd = () => {
+    if (document.body.style.overflow === 'hidden') return;
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
     const minSwipeDistance = 50;
