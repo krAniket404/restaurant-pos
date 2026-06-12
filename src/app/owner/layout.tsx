@@ -37,8 +37,8 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   };
 
   const onTouchEnd = () => {
-    if (document.body.style.overflow === 'hidden') return;
     if (!touchStart || !touchEnd) return;
+    if (document.body.style.overflow === 'hidden') return;
     const distance = touchStart - touchEnd;
     const minSwipeDistance = 50;
     const isLeftSwipe = distance > minSwipeDistance;
