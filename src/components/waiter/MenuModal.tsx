@@ -36,7 +36,6 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
       // Load existing items if modifying
       if (mode === 'modify' && existingOrders.length > 0) {
         // Flatten all active items for this table into the cart
@@ -47,9 +46,11 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         setCartItems([]);
       }
     } else {
-      document.body.style.overflow = 'unset';
-      document.body.style.height = 'unset';
+      document.body.style.overflow = '';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen, mode, existingOrders]);
 
   if (!isOpen) return null;
@@ -187,8 +188,8 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col sm:p-4">
-      <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative">
+    <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col sm:p-4" style={{ height: '100dvh' }}>
+      <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative" style={{ minHeight: 0 }}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-black/25" ref={topRef}>
           <h2 className="text-2xl font-bold text-slate-800">
@@ -200,7 +201,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </div>
 
         {/* Content Area - Cart at Top, Menu Below */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative p-4 sm:p-6" ref={scrollRef}>
+        <div className="flex-1 overflow-y-auto no-scrollbar relative p-4 sm:p-6" ref={scrollRef} style={{ minHeight: 0, WebkitOverflowScrolling: 'touch' }}>
 
           {/* Current Cart Items */}
           {cartItems.length > 0 && (
@@ -318,7 +319,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </div>
 
         {/* Bottom Bar Actions */}
-        <div className="w-full bg-white border-t p-4 sm:p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between z-10 pb-[calc(1rem+env(safe-area-inset-bottom))] mt-auto">
+        <div className="w-full bg-white border-t p-4 sm:p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex items-center justify-between z-10 shrink-0" style={{ paddingBottom: 'max(1rem, calc(0.5rem + env(safe-area-inset-bottom)))' }}>
           <div className="flex flex-col">
             <span className="text-sm text-slate-500">Total Amount</span>
             <span className="text-2xl font-bold text-slate-800">₹{totalCost}</span>

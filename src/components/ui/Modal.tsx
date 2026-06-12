@@ -23,7 +23,6 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
       document.documentElement.style.overflow = 'hidden';
       document.body.classList.add('modal-open-lock');
     } else {
