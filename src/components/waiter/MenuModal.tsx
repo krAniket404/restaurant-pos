@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchCategories, fetchMenuItems } from '../../lib/sanity/client';
 import { Category, MenuItem, OrderItem, Order } from '../../types';
 import { X, Plus, Minus, Search, ArrowUp, Info } from 'lucide-react';
@@ -15,6 +16,11 @@ interface MenuModalProps {
 }
 
 export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumber, mode, existingOrders }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -53,7 +59,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     };
   }, [isOpen, mode, existingOrders]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const filteredItems = menuItems.filter(item => {
     if (dietaryFilter === 'veg' && !item.isVeg) return false;
@@ -187,8 +193,8 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-50 flex flex-col sm:p-4" style={{ height: '100dvh' }}>
+  return createPortal(
+    <div className="fixed inset-0 top-0 z-[9999] bg-slate-50 flex flex-col sm:p-4" style={{ height: '100dvh' }}>
       <div className="bg-white flex-1 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden max-w-5xl mx-auto w-full relative" style={{ minHeight: 0 }}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-black/25" ref={topRef}>
@@ -353,6 +359,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
         </button>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

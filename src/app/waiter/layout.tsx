@@ -2,14 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutGrid, 
-  Clock, 
-  ChefHat, 
-  AlertCircle, 
-  Flame, 
-  CheckCircle, 
-  Utensils, 
+import {
+  LayoutGrid,
+  Clock,
+  ChefHat,
+  AlertCircle,
+  Flame,
+  CheckCircle,
+  Utensils,
   LogOut,
   Menu,
   X
@@ -85,12 +85,12 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
     if (contentRef.current) {
       const xOffset = swipeDirection === 'left' ? 100 : swipeDirection === 'right' ? -100 : 0;
       const initialY = swipeDirection ? 0 : 20;
-      
-      gsap.fromTo(contentRef.current, 
+
+      gsap.fromTo(contentRef.current,
         { opacity: 0, x: xOffset, y: initialY },
         { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }
       );
-      
+
       const timer = setTimeout(() => setSwipeDirection(null), 500);
       return () => clearTimeout(timer);
     }
@@ -114,9 +114,9 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   }, [user, router, subscribeToOrders, mounted]);
 
   useEffect(() => {
-    const newPopupOrders = orders.filter(o => 
-      (o.status === 'on_hold' || o.status === 'prepared') && 
-      o.updatedAt > mountTime.current && 
+    const newPopupOrders = orders.filter(o =>
+      (o.status === 'on_hold' || o.status === 'prepared') &&
+      o.updatedAt > mountTime.current &&
       !notifiedOrders.has(`${o.id}-${o.status}-${o.updatedAt}`)
     );
 
@@ -137,20 +137,20 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
   if (!mounted || !user || user.role !== 'waiter') return null;
 
   const validStatuses = navItems.map(item => item.countStatus).filter(Boolean);
-  const unseenCount = orders.filter(o => 
-    validStatuses.includes(o.status) && 
+  const unseenCount = orders.filter(o =>
+    validStatuses.includes(o.status) &&
     o.updatedAt > (lastSeen[o.status] || 0)
   ).length;
 
   return (
-    <div 
+    <div
       className="flex h-[100dvh] overflow-hidden bg-slate-50 relative"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 transition-opacity"
         />
       )}
@@ -159,7 +159,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
         isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative">
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(false)}
             className="absolute top-5 right-4 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95 z-50"
           >
@@ -181,13 +181,13 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
             const isActive = pathname === item.href;
             const count = item.countStatus ? orders.filter(o => o.status === item.countStatus).length : 0;
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 font-medium group",
-                  isActive 
-                    ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/20" 
+                  isActive
+                    ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/20"
                     : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
                 )}
               >
@@ -211,7 +211,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
           })}
         </nav>
         <div className="p-6 border-t border-slate-800 bg-slate-900/50 backdrop-blur-xl">
-          <button 
+          <button
             onClick={() => { logout(); router.push('/'); }}
             className="flex items-center space-x-3 w-full px-4 py-3.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition-all duration-300 font-medium group"
           >
@@ -222,7 +222,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
       </aside>
       <main className="flex-1 overflow-hidden flex flex-col relative w-full">
         <header className="bg-white px-6 py-4 flex items-center shadow-md z-10 shrink-0">
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(true)}
             className="p-2 -ml-2 mr-4 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors relative"
           >
@@ -243,7 +243,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
       </main>
 
       {popupOrder && (
-        <div 
+        <div
           className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-white rounded-2xl shadow-2xl border-2 border-rose-500 p-4 w-[90%] max-w-md animate-in slide-in-from-top-10 fade-in duration-300 cursor-pointer hover:bg-rose-50 transition-colors"
           onClick={() => {
             router.push(`/waiter/orders/${popupOrder.status}`);
@@ -255,12 +255,12 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
             <h3 className="text-lg font-bold text-slate-800">
               Order {popupOrder.status === 'on_hold' ? 'On Hold' : 'Ready'} - Table {popupOrder.tableNumber}
             </h3>
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
                 setPopupOrder(null);
-              }} 
+              }}
               className="text-slate-400 hover:text-slate-600"
             >
               <X className="w-5 h-5" />
@@ -268,7 +268,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
           </div>
           <div className="text-sm text-slate-600 mb-4 max-h-32 overflow-y-auto">
             {popupOrder.status === 'on_hold' && popupOrder.holdReason && (
-               <div className="text-red-500 mb-2 font-medium">Reason: {popupOrder.holdReason}</div>
+              <div className="text-red-500 mb-2 font-medium">Reason: {popupOrder.holdReason}</div>
             )}
             {popupOrder.items.map((item: any, idx: number) => (
               <div key={idx} className="flex flex-col border-b border-slate-100 py-2 last:border-0">
@@ -279,7 +279,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
             ))}
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               className="flex-1 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
@@ -289,7 +289,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
             >
               Dismiss
             </button>
-            <button 
+            <button
               className="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
