@@ -6,9 +6,6 @@ import {
   LayoutGrid,
   Clock,
   ChefHat,
-  AlertCircle,
-  Flame,
-  CheckCircle,
   Utensils,
   LogOut,
   Menu,
@@ -33,9 +30,7 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [popupOrder, setPopupOrder] = useState<any>(null);
-  const [notifiedOrders, setNotifiedOrders] = useState<Set<string>>(new Set());
-  const mountTime = React.useRef(Date.now());
+
 
   // Swipe gesture states
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -110,26 +105,7 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
     return () => unsub();
   }, [user, router, subscribeToOrders, mounted]);
 
-  useEffect(() => {
-    const newPopupOrders = orders.filter(o =>
-      (o.status === 'on_hold' || o.status === 'prepared') &&
-      o.updatedAt > mountTime.current &&
-      !notifiedOrders.has(`${o.id}-${o.status}-${o.updatedAt}`)
-    );
 
-    if (newPopupOrders.length > 0 && !popupOrder) {
-      setPopupOrder(newPopupOrders[0]);
-    }
-  }, [orders, notifiedOrders, popupOrder]);
-
-  useEffect(() => {
-    if (popupOrder) {
-      const currentOrder = orders.find(o => o.id === popupOrder.id);
-      if (!currentOrder || currentOrder.status !== popupOrder.status) {
-        setPopupOrder(null);
-      }
-    }
-  }, [orders, popupOrder]);
 
   if (!mounted || !user || user.role !== 'supervisor') return null;
 
@@ -239,67 +215,7 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
         </div>
       </main>
 
-      {popupOrder && (
-        <div
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-white rounded-2xl shadow-2xl border-2 border-rose-500 p-4 w-[90%] max-w-md animate-in slide-in-from-top-10 fade-in duration-300 cursor-pointer hover:bg-rose-50 transition-colors"
-          onClick={() => {
-            router.push(`/supervisor/orders/${popupOrder.status}`);
-            setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
-            setPopupOrder(null);
-          }}
-        >
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-bold text-slate-800">
-              Order {popupOrder.status === 'on_hold' ? 'On Hold' : 'Ready'} - Table {popupOrder.tableNumber}
-            </h3>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
-                setPopupOrder(null);
-              }}
-              className="text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="text-sm text-slate-600 mb-4 max-h-32 overflow-y-auto">
-            {popupOrder.status === 'on_hold' && popupOrder.holdReason && (
-              <div className="text-red-500 mb-2 font-medium">Reason: {popupOrder.holdReason}</div>
-            )}
-            {popupOrder.items.map((item: any, idx: number) => (
-              <div key={idx} className="flex flex-col border-b border-slate-100 py-2 last:border-0">
-                <div className="flex justify-between">
-                  <span className="font-medium text-slate-800">{item.quantity}x {item.name}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-3">
-            <button
-              className="flex-1 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-medium transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
-                setPopupOrder(null);
-              }}
-            >
-              Dismiss
-            </button>
-            <button
-              className="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
-                router.push(`/supervisor/orders/${popupOrder.status}`);
-                setPopupOrder(null);
-              }}
-            >
-              View Order
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
