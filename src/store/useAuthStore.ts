@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface AuthUser {
-  role: 'owner' | 'cashier' | 'manager' | 'waiter';
+  role: 'owner' | 'cashier' | 'supervisor';
   username: string;
 }
 

@@ -11,9 +11,10 @@ interface BillPreviewProps {
   orders: Order[] | null;
   restaurantName: string;
   onMarkPaid?: (orderIds: string[]) => Promise<void>;
+  isParcel?: boolean;
 }
 
-export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orders, restaurantName, onMarkPaid }) => {
+export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orders, restaurantName, onMarkPaid, isParcel }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
   if (!orders || orders.length === 0 || !isOpen) return null;
@@ -31,9 +32,7 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
   }, {} as Record<string, typeof rawItems[0]>) || {});
 
   const subtotal = orders.reduce((sum, o) => sum + o.total, 0);
-  const cgst = subtotal * 0.025;
-  const sgst = subtotal * 0.025;
-  const grandTotal = subtotal + cgst + sgst;
+  const grandTotal = subtotal;
   const tableNumber = orders[0].tableNumber;
 
   const handlePrint = () => {
@@ -54,7 +53,11 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
 
           <div className="flex justify-between mb-4 text-xs border-b border-dashed border-slate-300 pb-4">
             <div>
-              <p>Table: <span className="font-bold">{tableNumber}</span></p>
+              {isParcel ? (
+                <p className="font-bold text-base bg-slate-800 text-white inline-block px-2 py-1 rounded">PARCEL</p>
+              ) : (
+                <p>Table: <span className="font-bold">{tableNumber}</span></p>
+              )}
               <p>Orders: {orders.length}</p>
             </div>
             <div className="text-right">
@@ -82,14 +85,6 @@ export const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, order
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>₹{subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>CGST (2.5%)</span>
-              <span>₹{cgst.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>SGST (2.5%)</span>
-              <span>₹{sgst.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t border-dashed border-slate-300">
               <span>Grand Total</span>

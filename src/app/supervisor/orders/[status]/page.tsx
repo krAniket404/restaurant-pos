@@ -4,12 +4,11 @@ import { useOrderStore } from '../../../../store/useOrderStore';
 import { OrderStatus, Order } from '../../../../types';
 import { Card, CardContent } from '../../../../components/ui/Card';
 import { Button } from '../../../../components/ui/Button';
-import { MenuModal } from '../../../../components/waiter/MenuModal';
+import { MenuModal } from '../../../../components/supervisor/MenuModal';
 
-export default function WaiterOrdersPage({ params }: { params: Promise<{ status: string }> }) {
+export default function SupervisorOrdersPage({ params }: { params: Promise<{ status: string }> }) {
   const { orders, updateOrderStatus, deleteOrder } = useOrderStore();
   const [status, setStatus] = useState<OrderStatus | null>(null);
-  const [modifyingOrder, setModifyingOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     params.then(p => setStatus(p.status as OrderStatus));
@@ -22,10 +21,6 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
   const getStatusTitle = () => {
     switch (status) {
       case 'requested': return 'Requested Orders';
-      case 'in_queue': return 'Orders in Queue';
-      case 'on_hold': return 'Orders On Hold';
-      case 'preparing': return 'Currently Preparing';
-      case 'prepared': return 'Ready to Serve';
       case 'served': return 'Served Orders';
       default: return 'Orders';
     }
@@ -46,11 +41,6 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
               <div className="bg-slate-100 p-4 border-b flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div className="flex items-center space-x-3">
                   <span className="font-bold text-lg text-slate-800">Table {order.tableNumber}</span>
-                  {order.isModified && status === 'requested' && (
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wider">
-                      Modified
-                    </span>
-                  )}
                 </div>
                 <span className="text-sm text-slate-500">{new Date(order.createdAt).toLocaleTimeString()}</span>
               </div>
@@ -71,50 +61,17 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
                   ))}
                 </div>
                 
-                {status === 'on_hold' && (
-                  <div className="flex flex-col space-y-3 mb-4">
-                    {order.holdReason && (
-                      <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
-                        <span className="font-semibold">Reason:</span> {order.holdReason}
-                      </div>
-                    )}
+                {status === 'requested' && (
+                  <div className="flex space-x-2 mt-4">
                     <Button 
-                      variant="outline"
-                      className="w-full border-red-200 hover:bg-red-50 hover:text-red-700 text-slate-700"
-                      onClick={() => setModifyingOrder(order)}
+                      className="flex-1"
+                      onClick={() => updateOrderStatus(order.id, 'served')}
                     >
-                      Modify
+                      Mark Served
                     </Button>
-                  </div>
-                )}
-
-                {status === 'prepared' && (
-                  <Button 
-                    className="w-full mb-3"
-                    onClick={() => updateOrderStatus(order.id, 'served')}
-                  >
-                    Mark Served
-                  </Button>
-                )}
-
-                {(status === 'requested' || status === 'in_queue' || status === 'on_hold') && (
-                  <div className={(status === 'in_queue' || status === 'requested') ? "flex space-x-2" : ""}>
-                    {(status === 'in_queue' || status === 'requested') && (
-                      <Button
-                        variant="outline"
-                        className="flex-1 border-blue-200 hover:bg-blue-50 hover:text-blue-700 text-slate-700"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setModifyingOrder(order);
-                        }}
-                      >
-                        Modify
-                      </Button>
-                    )}
                     <Button 
                       variant="danger"
-                      className={(status === 'in_queue' || status === 'requested') ? "flex-1 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100" : "w-full border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"}
+                      className="flex-1 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -131,16 +88,6 @@ export default function WaiterOrdersPage({ params }: { params: Promise<{ status:
             </Card>
           ))}
         </div>
-      )}
-
-      {modifyingOrder && (
-        <MenuModal 
-          isOpen={true}
-          onClose={() => setModifyingOrder(null)}
-          tableNumber={modifyingOrder.tableNumber}
-          mode="modify"
-          existingOrders={[modifyingOrder]}
-        />
       )}
     </div>
   );

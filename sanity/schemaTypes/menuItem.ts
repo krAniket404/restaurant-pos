@@ -31,6 +31,12 @@ export default defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'isAvailable',
+      title: 'Is Available?',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'category',
       title: 'Category',
       type: 'reference',

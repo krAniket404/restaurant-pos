@@ -20,16 +20,13 @@ import { cn } from '../../components/ui/Button';
 import { useOrderStore } from '../../store/useOrderStore';
 
 const navItems = [
-  { href: '/waiter', label: 'All Tables', icon: LayoutGrid, countStatus: null },
-  { href: '/waiter/orders/requested', label: 'Requested', icon: Clock, countStatus: 'requested' },
-  { href: '/waiter/orders/in_queue', label: 'In Queue', icon: ChefHat, countStatus: 'in_queue' },
-  { href: '/waiter/orders/on_hold', label: 'On Hold', icon: AlertCircle, countStatus: 'on_hold' },
-  { href: '/waiter/orders/preparing', label: 'Preparing', icon: Flame, countStatus: 'preparing' },
-  { href: '/waiter/orders/prepared', label: 'Prepared', icon: CheckCircle, countStatus: 'prepared' },
-  { href: '/waiter/orders/served', label: 'Served', icon: Utensils, countStatus: 'served' },
+  { href: '/supervisor', label: 'All Tables', icon: LayoutGrid, countStatus: null },
+  { href: '/supervisor/orders/requested', label: 'Requested', icon: Clock, countStatus: 'requested' },
+  { href: '/supervisor/orders/served', label: 'Served', icon: Utensils, countStatus: 'served' },
+  { href: '/supervisor/menu', label: 'Menu Availability', icon: ChefHat, countStatus: null },
 ];
 
-export default function WaiterLayout({ children }: { children: React.ReactNode }) {
+export default function SupervisorLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
@@ -105,7 +102,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (mounted) {
-      if (!user || user.role !== 'waiter') {
+      if (!user || user.role !== 'supervisor') {
         router.push('/');
       }
     }
@@ -134,7 +131,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
     }
   }, [orders, popupOrder]);
 
-  if (!mounted || !user || user.role !== 'waiter') return null;
+  if (!mounted || !user || user.role !== 'supervisor') return null;
 
   const validStatuses = navItems.map(item => item.countStatus).filter(Boolean);
   const unseenCount = orders.filter(o =>
@@ -170,7 +167,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
               <Utensils className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Waiter Panel</h2>
+              <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Supervisor Panel</h2>
               <p className="text-xs text-rose-400 font-medium capitalize">@{user.username}</p>
             </div>
           </div>
@@ -246,7 +243,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
         <div
           className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-white rounded-2xl shadow-2xl border-2 border-rose-500 p-4 w-[90%] max-w-md animate-in slide-in-from-top-10 fade-in duration-300 cursor-pointer hover:bg-rose-50 transition-colors"
           onClick={() => {
-            router.push(`/waiter/orders/${popupOrder.status}`);
+            router.push(`/supervisor/orders/${popupOrder.status}`);
             setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
             setPopupOrder(null);
           }}
@@ -294,7 +291,7 @@ export default function WaiterLayout({ children }: { children: React.ReactNode }
               onClick={(e) => {
                 e.stopPropagation();
                 setNotifiedOrders(prev => new Set(prev).add(`${popupOrder.id}-${popupOrder.status}-${popupOrder.updatedAt}`));
-                router.push(`/waiter/orders/${popupOrder.status}`);
+                router.push(`/supervisor/orders/${popupOrder.status}`);
                 setPopupOrder(null);
               }}
             >

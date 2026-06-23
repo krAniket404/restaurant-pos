@@ -5,10 +5,20 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Order } from '../../types';
 import { Calendar as CalendarIcon, Search } from 'lucide-react';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { BillPreview } from '../../components/cashier/BillPreview';
+import { fetchRestaurantDetails } from '../../lib/sanity/client';
 
 export default function OwnerDashboard() {
   const { orders, subscribeToOrders } = useOrderStore();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedOrderForBill, setSelectedOrderForBill] = useState<Order | null>(null);
+  const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
+
+  useEffect(() => {
+    fetchRestaurantDetails()
+      .then(res => { if (res?.name) setRestaurantName(res.name); })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const unsub = subscribeToOrders();
@@ -104,6 +114,13 @@ export default function OwnerDashboard() {
                             </span>
                             <span className="font-bold text-slate-800">₹{order.total}</span>
                           </div>
+                          <Button 
+                            variant="secondary" 
+                            className="w-full mt-4 text-xs h-8"
+                            onClick={() => setSelectedOrderForBill(order)}
+                          >
+                            View Bill
+                          </Button>
                         </CardContent>
                       </Card>
                     ))}
@@ -160,6 +177,16 @@ export default function OwnerDashboard() {
           ))}
         </div>
       </div>
+      
+      {selectedOrderForBill && (
+        <BillPreview
+          isOpen={true}
+          onClose={() => setSelectedOrderForBill(null)}
+          orders={[selectedOrderForBill]}
+          restaurantName={restaurantName}
+          isParcel={selectedOrderForBill.tableNumber === 0}
+        />
+      )}
     </div>
   );
 }

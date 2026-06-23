@@ -13,8 +13,7 @@ export default defineType({
         list: [
           { title: 'Owner', value: 'owner' },
           { title: 'Cashier', value: 'cashier' },
-          { title: 'Kitchen Manager', value: 'manager' },
-          { title: 'Waiter', value: 'waiter' },
+          { title: 'Supervisor', value: 'supervisor' },
         ],
       },
       validation: (Rule) => Rule.required(),

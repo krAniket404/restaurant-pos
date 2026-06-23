@@ -5,13 +5,15 @@ import { fetchRestaurantDetails } from '../../../lib/sanity/client';
 import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { BillPreview } from '../../../components/cashier/BillPreview';
+import { MenuModal } from '../../../components/supervisor/MenuModal';
 import { Order } from '../../../types';
-import { Receipt } from 'lucide-react';
+import { Receipt, Plus } from 'lucide-react';
 
 export default function CashierBillingPage() {
   const { orders, updateOrderStatus } = useOrderStore();
   const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
   const [selectedOrders, setSelectedOrders] = useState<Order[] | null>(null);
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRestaurantDetails()
@@ -49,10 +51,19 @@ export default function CashierBillingPage() {
   return (
     <div className="flex-1 p-4 md:p-8 overflow-y-auto bg-slate-50">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">Ready to Bill</h1>
-        <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-semibold">
-          {mergedTables.length} Tables Pending
-        </span>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold text-slate-800">Ready to Bill</h1>
+          <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full font-semibold text-sm">
+            {mergedTables.length} Tables Pending
+          </span>
+        </div>
+        <Button 
+          onClick={() => setIsMenuModalOpen(true)}
+          className="bg-orange-600 hover:bg-orange-700 text-white shadow-md"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Create Parcel Order
+        </Button>
       </div>
 
       {mergedTables.length === 0 ? (
@@ -121,6 +132,14 @@ export default function CashierBillingPage() {
           }
         }}
       />
+
+      {isMenuModalOpen && (
+        <MenuModal
+          isOpen={isMenuModalOpen}
+          onClose={() => setIsMenuModalOpen(false)}
+          isParcel={true}
+        />
+      )}
     </div>
   );
 }

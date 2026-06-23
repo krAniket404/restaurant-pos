@@ -6,16 +6,15 @@ import { useOrderStore } from '../../store/useOrderStore';
 import { cn } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { MenuModal } from '../../components/waiter/MenuModal';
+import { MenuModal } from '../../components/supervisor/MenuModal';
 import { useRouter } from 'next/navigation';
 
-export default function WaiterDashboard() {
+export default function SupervisorDashboard() {
   const [tables, setTables] = useState<TableType[]>([]);
   const { orders } = useOrderStore();
   const [selectedTable, setSelectedTable] = useState<TableType | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
-  const [menuMode, setMenuMode] = useState<'create' | 'modify'>('create');
   const router = useRouter();
 
   useEffect(() => {
@@ -54,13 +53,6 @@ export default function WaiterDashboard() {
   const hasActiveOrder = activeOrders.length > 0;
 
   const handleCreateOrder = () => {
-    setMenuMode('create');
-    setIsActionModalOpen(false);
-    setIsMenuModalOpen(true);
-  };
-
-  const handleModifyOrder = () => {
-    setMenuMode('modify');
     setIsActionModalOpen(false);
     setIsMenuModalOpen(true);
   };
@@ -109,17 +101,9 @@ export default function WaiterDashboard() {
           </Button>
           <Button
             size="lg"
-            variant="secondary"
-            onClick={handleModifyOrder}
-            disabled={!hasActiveOrder || activeOrders.some(o => ['preparing', 'prepared', 'served'].includes(o.status))}
-          >
-            Modify Order
-          </Button>
-          <Button
-            size="lg"
             variant="danger"
             onClick={handleCancelOrder}
-            disabled={!hasActiveOrder || activeOrders.some(o => ['preparing', 'prepared', 'served', 'paid'].includes(o.status))}
+            disabled={!hasActiveOrder || activeOrders.some(o => ['served', 'paid'].includes(o.status))}
           >
             Cancel Order
           </Button>
@@ -131,7 +115,6 @@ export default function WaiterDashboard() {
           isOpen={isMenuModalOpen}
           onClose={() => setIsMenuModalOpen(false)}
           tableNumber={selectedTable.tableNumber}
-          mode={menuMode}
           existingOrders={activeOrders}
         />
       )}

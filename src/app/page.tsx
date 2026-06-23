@@ -8,8 +8,7 @@ import { Card, CardContent } from '../components/ui/Card';
 const roles = [
   { id: 'owner', label: "Owner's Dashboard", icon: LayoutDashboard, color: 'bg-indigo-500' },
   { id: 'cashier', label: "Cashier's Dashboard", icon: CreditCard, color: 'bg-green-500' },
-  { id: 'manager', label: "Kitchen Manager", icon: ChefHat, color: 'bg-orange-500' },
-  { id: 'waiter', label: "Waiter's Dashboard", icon: UtensilsCrossed, color: 'bg-rose-500' },
+  { id: 'supervisor', label: "Supervisor's Dashboard", icon: UtensilsCrossed, color: 'bg-rose-500' },
 ];
 
 export default function Home() {

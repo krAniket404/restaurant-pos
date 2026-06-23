@@ -13,6 +13,7 @@ export const fetchMenuItems = async () => {
     title,
     price,
     isVeg,
+    isAvailable,
     description,
     category->{_id, title}
   }`);

@@ -1,9 +1,5 @@
 export type OrderStatus = 
   | 'requested'
-  | 'in_queue'
-  | 'on_hold'
-  | 'preparing'
-  | 'prepared'
   | 'served'
   | 'paid';
 
@@ -25,7 +21,7 @@ export interface Order {
   updatedAt: number;
   total: number;
   holdReason?: string;
-  isModified?: boolean;
+
 }
 
 export interface Table {
@@ -39,6 +35,7 @@ export interface MenuItem {
   title: string;
   price: number;
   isVeg: boolean;
+  isAvailable?: boolean;
   category: {
     _id: string;
     title: string;
