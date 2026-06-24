@@ -10,7 +10,7 @@ interface OrderStore {
   lastSeen: Record<string, number>;
   subscribeToOrders: () => () => void;
   createOrder: (tableNumber: number, items: Order['items'], total: number) => Promise<void>;
-  updateOrderStatus: (orderId: string, status: OrderStatus, reason?: string) => Promise<void>;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
   updateOrderItems: (orderId: string, items: Order['items'], total: number, newStatus?: OrderStatus, isModified?: boolean) => Promise<void>;
   deleteOrder: (orderId: string) => Promise<void>;
   markStatusSeen: (status: string) => void;
@@ -53,11 +53,10 @@ export const useOrderStore = create<OrderStore>()(
           console.error("Error creating order in Firestore:", error);
         }
       },
-      updateOrderStatus: async (orderId, status, reason) => {
+      updateOrderStatus: async (orderId, status) => {
         try {
           const orderRef = doc(db, 'orders', orderId);
           const updateData: any = { status, updatedAt: Date.now() };
-          if (reason) updateData.holdReason = reason;
           await updateDoc(orderRef, updateData);
         } catch (error) {
           console.error("Error updating order status:", error);

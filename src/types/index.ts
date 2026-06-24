@@ -20,8 +20,6 @@ export interface Order {
   createdAt: number;
   updatedAt: number;
   total: number;
-  holdReason?: string;
-
 }
 
 export interface Table {

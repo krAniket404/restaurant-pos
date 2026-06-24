@@ -26,12 +26,8 @@ export default function SupervisorDashboard() {
     if (tableOrders.length === 0) return 'bg-white border-slate-200/50 text-slate-700 hover:border-slate-300/50';
 
     const statuses = tableOrders.map(o => o.status);
-    if (statuses.includes('on_hold')) return 'bg-red-100 border-red-300/50 text-red-800';
     if (statuses.includes('requested')) return 'bg-yellow-100 border-yellow-300/50 text-yellow-800';
-    if (statuses.includes('preparing')) return 'bg-orange-100 border-orange-300/50 text-orange-800';
-    if (statuses.includes('prepared')) return 'bg-green-100 border-green-300/50 text-green-800';
     if (statuses.includes('served')) return 'bg-blue-100 border-blue-300/50 text-blue-800';
-    if (statuses.includes('in_queue')) return 'bg-purple-100 border-purple-300/50 text-purple-800';
 
     return 'bg-slate-100 border-slate-300/50';
   };
@@ -115,7 +111,6 @@ export default function SupervisorDashboard() {
           isOpen={isMenuModalOpen}
           onClose={() => setIsMenuModalOpen(false)}
           tableNumber={selectedTable.tableNumber}
-          existingOrders={activeOrders}
         />
       )}
     </div>
