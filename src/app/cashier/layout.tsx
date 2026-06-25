@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Receipt, CheckCircle, LogOut, Menu, X } from 'lucide-react';
+import { Receipt, CheckCircle, LogOut, Menu, X, Wallet } from 'lucide-react';
 import gsap from 'gsap';
 import { useAuthStore } from '../../store/useAuthStore';
 import { cn } from '../../components/ui/Button';
@@ -11,6 +11,7 @@ import { useOrderStore } from '../../store/useOrderStore';
 const navItems = [
   { href: '/cashier/billing', label: 'Ready to Bill', icon: Receipt, status: 'served' },
   { href: '/cashier/paid', label: 'Paid Today', icon: CheckCircle, status: 'paid' },
+  { href: '/cashier/expenses', label: 'Daily Expenses', icon: Wallet, status: null },
 ];
 
 export default function CashierLayout({ children }: { children: React.ReactNode }) {

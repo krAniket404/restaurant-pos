@@ -46,3 +46,13 @@ export interface Category {
   title: string;
   slug: { current: string };
 }
+
+export type ExpenseType = 'item' | 'person';
+
+export interface Expense {
+  id: string;
+  type: ExpenseType;
+  name: string;
+  amount: number;
+  createdAt: number;
+}

@@ -6,7 +6,9 @@ import { History, BarChart3, LogOut, Menu, X } from 'lucide-react';
 import gsap from 'gsap';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useOrderStore } from '../../store/useOrderStore';
+import { useExpenseStore } from '../../store/useExpenseStore';
 import { cn } from '../../components/ui/Button';
+import { isToday } from 'date-fns';
 
 const navItems = [
   { href: '/owner', label: 'Order History', icon: History },
@@ -18,6 +20,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
+  const { expenses, subscribeToExpenses } = useExpenseStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -89,13 +92,25 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
         router.push('/');
       }
     }
-    const unsub = subscribeToOrders();
-    return () => unsub();
-  }, [user, router, subscribeToOrders, mounted]);
+    const unsubOrders = subscribeToOrders();
+    const unsubExpenses = subscribeToExpenses();
+    return () => {
+      unsubOrders();
+      unsubExpenses();
+    };
+  }, [user, router, subscribeToOrders, subscribeToExpenses, mounted]);
 
   if (!mounted || !user || user.role !== 'owner') return null;
 
   const unseenCount = orders.filter(o => o.updatedAt > (lastSeen['all'] || 0)).length;
+
+  const todayOrders = orders.filter(o => o.status === 'paid' && isToday(new Date(o.createdAt)));
+  const dailyBills = todayOrders.reduce((sum, o) => sum + o.total, 0);
+  
+  const todayExpenses = expenses.filter(e => isToday(new Date(e.createdAt)));
+  const dailyExpense = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+  const totalProfit = dailyBills - dailyExpense;
 
   return (
     <div 
@@ -144,7 +159,27 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-        <div className="p-4 border-t border-indigo-800">
+        <div className="p-4 space-y-3 border-t border-indigo-800">
+          <div className="bg-indigo-800/50 rounded-xl p-3">
+            <p className="text-xs text-indigo-300 uppercase tracking-wider font-bold mb-1">Today's Finance</p>
+            <div className="flex justify-between items-center text-sm mb-1">
+              <span className="text-indigo-200">Revenue</span>
+              <span className="font-medium text-white">₹{dailyBills.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm mb-2 pb-2 border-b border-indigo-700">
+              <span className="text-red-300">Expenses</span>
+              <span className="font-medium text-red-200">-₹{dailyExpense.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-indigo-100 font-bold">Profit</span>
+              <span className={cn(
+                "font-bold text-lg",
+                totalProfit >= 0 ? "text-green-400" : "text-red-400"
+              )}>
+                ₹{totalProfit.toFixed(2)}
+              </span>
+            </div>
+          </div>
           <button 
             onClick={() => { logout(); router.push('/'); }}
             className="flex items-center space-x-3 w-full px-4 py-3 hover:bg-indigo-800 hover:text-red-300 rounded-xl transition-colors font-medium"
