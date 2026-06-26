@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ArrowLeft, Lock, User } from 'lucide-react';
@@ -14,17 +14,15 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
   const { login } = useAuthStore();
   const formRef = useRef<HTMLDivElement>(null);
 
-  const [role, setRole] = useState<string>('');
+  const resolvedParams = use(params);
+  const role = resolvedParams.role;
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    params.then(p => setRole(p.role));
-  }, [params]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (formRef.current) {
       gsap.fromTo(formRef.current,
         { opacity: 0, scale: 0.95 },
