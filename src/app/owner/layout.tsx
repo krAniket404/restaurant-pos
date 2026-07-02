@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { History, BarChart3, LogOut, Menu, X, IndianRupee, TrendingUp } from 'lucide-react';
+import { History, BarChart3, LogOut, Menu as MenuIcon, X, IndianRupee, TrendingUp, Settings, Users, Grid } from 'lucide-react';
 import gsap from 'gsap';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useOrderStore } from '../../store/useOrderStore';
@@ -13,6 +13,9 @@ const navItems = [
   { href: '/owner', label: 'Order History', icon: History },
   { href: '/owner/revenue', label: 'Revenue Generated', icon: IndianRupee },
   { href: '/owner/profit', label: 'Profit Made', icon: TrendingUp },
+  { href: '/owner/menu', label: 'Menu Management', icon: Grid },
+  { href: '/owner/tables', label: 'Table Management', icon: Settings },
+  { href: '/owner/users', label: 'User Management', icon: Users },
 ];
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
@@ -167,7 +170,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
             onClick={() => setSidebarOpen(true)}
             className="p-2 -ml-2 mr-4 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors relative"
           >
-            <Menu className="w-6 h-6" />
+            <MenuIcon className="w-6 h-6" />
             {unseenCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border-2 border-white translate-x-1/2 -translate-y-1/4">
                 {unseenCount}

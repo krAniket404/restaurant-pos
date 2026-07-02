@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { fetchCategories, fetchMenuItems } from '../../lib/sanity/client';
+import { getCategories, getMenuItems } from '../../lib/firebase/db';
 import { Category, MenuItem, OrderItem, Order } from '../../types';
 import { X, Plus, Minus, Search, ArrowUp, Printer } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -34,8 +34,8 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
 
   useEffect(() => {
     setMounted(true);
-    fetchCategories().then(setCategories).catch(console.error);
-    fetchMenuItems().then(setMenuItems).catch(console.error);
+    getCategories().then(setCategories).catch(console.error);
+    getMenuItems().then(setMenuItems).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -56,22 +56,22 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
 
   const filteredItems = menuItems.filter(item => {
     if (item.isAvailable === false) return false;
-    if (dietaryFilter === 'veg' && !item.isVeg) return false;
-    if (dietaryFilter === 'non-veg' && item.isVeg) return false;
-    if (activeCategory !== 'all' && item.category._id !== activeCategory) return false;
-    if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (dietaryFilter === 'veg' && item.dietType !== 'veg') return false;
+    if (dietaryFilter === 'non-veg' && item.dietType !== 'non-veg') return false;
+    if (activeCategory !== 'all' && item.categoryId !== activeCategory) return false;
+    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const handleAddItem = (item: MenuItem) => {
     const newItem: OrderItem = {
       id: Math.random().toString(36).substr(2, 9),
-      menuItemId: item._id,
-      name: item.title,
+      menuItemId: item.id,
+      name: item.name,
       price: item.price,
       quantity: 1,
     };
-    const existing = cartItems.find(i => i.menuItemId === item._id && (!i.instructions || i.instructions.length === 0));
+    const existing = cartItems.find(i => i.menuItemId === item.id && (!i.instructions || i.instructions.length === 0));
     if (existing) {
       setCartItems(cartItems.map(i => i.id === existing.id ? { ...i, quantity: i.quantity + 1 } : i));
     } else {
@@ -293,11 +293,11 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                   </button>
                   {categories.map(cat => (
                     <button
-                      key={cat._id}
-                      onClick={() => setActiveCategory(cat._id)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat._id ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat.id ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                     >
-                      {cat.title}
+                      {cat.name}
                     </button>
                   ))}
                 </div>
@@ -308,14 +308,14 @@ export const MenuModal: React.FC<MenuModalProps> = ({ isOpen, onClose, tableNumb
                 {filteredItems.length === 0 ? (
                   <div className="col-span-full py-12 text-center text-slate-500">No menu items found.</div>
                 ) : filteredItems.map(item => (
-                  <div key={item._id} className="bg-white border border-slate-200 shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col p-5">
+                  <div key={item.id} className="bg-white border border-slate-200 shadow-lg rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col p-5">
                     <div className="flex flex-col flex-1">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
-                          <div className={`flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center bg-white shadow-sm border ${item.isVeg ? 'border-green-500' : 'border-red-500'}`}>
-                            <div className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                          <div className={`flex-shrink-0 w-5 h-5 rounded-md flex items-center justify-center bg-white shadow-sm border ${item.dietType === 'veg' ? 'border-green-500' : 'border-red-500'}`}>
+                            <div className={`w-2 h-2 rounded-full ${item.dietType === 'veg' ? 'bg-green-500' : 'bg-red-500'}`}></div>
                           </div>
-                          <h4 className="font-bold text-lg text-slate-800 line-clamp-1">{item.title}</h4>
+                          <h4 className="font-bold text-lg text-slate-800 line-clamp-1">{item.name}</h4>
                         </div>
                         <span className="font-bold text-orange-600 ml-2">₹{item.price}</span>
                       </div>

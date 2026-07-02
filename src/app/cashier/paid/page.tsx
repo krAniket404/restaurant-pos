@@ -11,13 +11,7 @@ import { BillPreview } from '../../../components/cashier/BillPreview';
 export default function CashierPaidPage() {
   const { orders } = useOrderStore();
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
-  const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
-
-  React.useEffect(() => {
-    import('../../../lib/sanity/client').then(({ fetchRestaurantDetails }) => {
-      fetchRestaurantDetails().then(res => { if (res?.name) setRestaurantName(res.name); }).catch(console.error);
-    });
-  }, []);
+  const [restaurantName, setRestaurantName] = useState('Geethika Restaurant');
 
   // Filter for 'paid' status and today's date
   const todayStart = new Date();

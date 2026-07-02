@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { fetchCategories, fetchMenuItems } from '../../../lib/sanity/client';
+import { getCategories, getMenuItems, updateMenuItem } from '../../../lib/firebase/db';
 import { Category, MenuItem } from '../../../types';
 import { Search } from 'lucide-react';
 
@@ -12,44 +12,36 @@ export default function MenuAvailabilityPage() {
   const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchCategories().then(setCategories).catch(console.error);
-    fetchMenuItems().then(setMenuItems).catch(console.error);
+    getCategories().then(setCategories).catch(console.error);
+    getMenuItems().then(setMenuItems).catch(console.error);
   }, []);
 
   const toggleAvailability = async (item: MenuItem) => {
     const newStatus = item.isAvailable === false ? true : false;
     
     // Optimistic update
-    setMenuItems(prev => prev.map(i => i._id === item._id ? { ...i, isAvailable: newStatus } : i));
-    setLoadingItems(prev => new Set(prev).add(item._id));
+    setMenuItems(prev => prev.map(i => i.id === item.id ? { ...i, isAvailable: newStatus } : i));
+    setLoadingItems(prev => new Set(prev).add(item.id));
 
     try {
-      const res = await fetch(`/api/menu/${item._id}/availability`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isAvailable: newStatus }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to update');
-      }
+      await updateMenuItem(item.id, { isAvailable: newStatus });
     } catch (error) {
       console.error(error);
       // Revert on failure
-      setMenuItems(prev => prev.map(i => i._id === item._id ? { ...i, isAvailable: !newStatus } : i));
+      setMenuItems(prev => prev.map(i => i.id === item.id ? { ...i, isAvailable: !newStatus } : i));
       alert('Failed to update availability. Please try again.');
     } finally {
       setLoadingItems(prev => {
         const next = new Set(prev);
-        next.delete(item._id);
+        next.delete(item.id);
         return next;
       });
     }
   };
 
   const filteredItems = menuItems.filter(item => {
-    if (activeCategory !== 'all' && item.category._id !== activeCategory) return false;
-    if (searchQuery && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (activeCategory !== 'all' && item.categoryId !== activeCategory) return false;
+    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
 
@@ -78,11 +70,11 @@ export default function MenuAvailabilityPage() {
             </button>
             {categories.map(cat => (
               <button
-                key={cat._id}
-                onClick={() => setActiveCategory(cat._id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat._id ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat.id ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
               >
-                {cat.title}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -92,9 +84,9 @@ export default function MenuAvailabilityPage() {
           {filteredItems.length === 0 ? (
             <p className="col-span-full text-center text-slate-500 py-8">No menu items found.</p>
           ) : filteredItems.map(item => (
-            <div key={item._id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div key={item.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
               <div className="flex flex-col">
-                <span className="font-semibold text-slate-800">{item.title}</span>
+                <span className="font-semibold text-slate-800">{item.name}</span>
                 <span className="text-sm text-slate-500">₹{item.price}</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -103,7 +95,7 @@ export default function MenuAvailabilityPage() {
                   className="sr-only peer"
                   checked={item.isAvailable !== false}
                   onChange={() => toggleAvailability(item)}
-                  disabled={loadingItems.has(item._id)}
+                  disabled={loadingItems.has(item.id)}
                 />
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
               </label>

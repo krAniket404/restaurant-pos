@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ArrowLeft, Lock, User } from 'lucide-react';
 import { useAuthStore } from '../../../store/useAuthStore';
-import { fetchUsers } from '../../../lib/sanity/client';
+import { getUserByUsername } from '../../../lib/firebase/db';
+import { hashPassword } from '../../../lib/hash';
 import { Button } from '../../../components/ui/Button';
 import { Card, CardContent } from '../../../components/ui/Card';
 
@@ -37,19 +38,23 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
     setError('');
 
     try {
-      const users = await fetchUsers();
-      const user = users.find((u: any) => u.role === role && u.username === username && u.password === password);
-
-      if (user) {
+      const user = await getUserByUsername(username);
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+      
+      const hashedAttempt = await hashPassword(password);
+      
+      if (user.role === role && user.password === hashedAttempt) {
         login({ role: role as any, username });
         router.push(`/${role}`);
       } else {
-        setError('Invalid credentials. Please try again.');
-        gsap.fromTo(formRef.current, { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.to(formRef.current, { x: 0 }) });
+        throw new Error('Invalid credentials');
       }
     } catch (err) {
       console.error(err);
-      setError('Error validating credentials. Ensure Sanity CMS is configured.');
+      setError('Invalid credentials. Please try again.');
+      gsap.fromTo(formRef.current, { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.to(formRef.current, { x: 0 }) });
     } finally {
       setLoading(false);
     }

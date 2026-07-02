@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useMemo } from 'react';
-import { fetchTables } from '../../lib/sanity/client';
+import { getTables } from '../../lib/firebase/db';
 import { Table as TableType } from '../../types';
 import { useOrderStore } from '../../store/useOrderStore';
 import { cn } from '../../components/ui/Button';
@@ -18,7 +18,7 @@ export default function SupervisorDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchTables().then(setTables).catch(console.error);
+    getTables().then(setTables).catch(console.error);
   }, []);
 
   const getTableColor = (tableNumber: number) => {

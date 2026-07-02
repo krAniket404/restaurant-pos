@@ -29,22 +29,19 @@ export interface Table {
 }
 
 export interface MenuItem {
-  _id: string;
-  title: string;
+  id: string;
+  name: string;
   price: number;
-  isVeg: boolean;
+  dietType: 'veg' | 'non-veg';
   isAvailable?: boolean;
-  category: {
-    _id: string;
-    title: string;
-  };
+  categoryId: string | null;
   description?: string;
 }
 
 export interface Category {
-  _id: string;
-  title: string;
-  slug: { current: string };
+  id: string;
+  name: string;
+  slug: string;
 }
 
 export type ExpenseType = 'item' | 'person';

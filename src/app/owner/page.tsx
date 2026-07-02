@@ -6,20 +6,13 @@ import { Order } from '../../types';
 import { Calendar as CalendarIcon, Search } from 'lucide-react';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { BillPreview } from '../../components/cashier/BillPreview';
-import { fetchRestaurantDetails } from '../../lib/sanity/client';
 import { Button } from '@/components/ui/Button';
 
 export default function OwnerDashboard() {
   const { orders, subscribeToOrders } = useOrderStore();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedOrderForBill, setSelectedOrderForBill] = useState<Order | null>(null);
-  const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
-
-  useEffect(() => {
-    fetchRestaurantDetails()
-      .then(res => { if (res?.name) setRestaurantName(res.name); })
-      .catch(console.error);
-  }, []);
+  const [restaurantName, setRestaurantName] = useState('Geethika Restaurant');
 
   useEffect(() => {
     const unsub = subscribeToOrders();

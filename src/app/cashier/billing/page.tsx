@@ -1,7 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useOrderStore } from '../../../store/useOrderStore';
-import { fetchRestaurantDetails } from '../../../lib/sanity/client';
 import { Card, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { BillPreview } from '../../../components/cashier/BillPreview';
@@ -11,15 +10,9 @@ import { Receipt, Plus } from 'lucide-react';
 
 export default function CashierBillingPage() {
   const { orders, updateOrderStatus } = useOrderStore();
-  const [restaurantName, setRestaurantName] = useState('Garam Masala Restaurant');
+  const [restaurantName, setRestaurantName] = useState('Geethika Restaurant');
   const [selectedOrders, setSelectedOrders] = useState<Order[] | null>(null);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetchRestaurantDetails()
-      .then(res => { if (res?.name) setRestaurantName(res.name); })
-      .catch(console.error);
-  }, []);
 
   // Ready to bill = "served" status
   const readyOrders = orders.filter(o => o.status === 'served');
