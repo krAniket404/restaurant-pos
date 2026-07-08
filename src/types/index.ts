@@ -1,7 +1,6 @@
-export type OrderStatus = 
-  | 'requested'
-  | 'served'
-  | 'paid';
+export type OrderStatus = "requested" | "served" | "paid";
+
+export type ModificationDecision = "pending" | "approved" | "rejected";
 
 export interface OrderItem {
   id: string; // unique id for the line item to handle removals
@@ -12,6 +11,17 @@ export interface OrderItem {
   instructions?: string[];
 }
 
+export interface ModificationDecisionItem {
+  id: string;
+  menuItemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  originalQuantity: number;
+  instructions?: string[];
+  decision: ModificationDecision;
+}
+
 export interface Order {
   id: string;
   tableNumber: number;
@@ -20,6 +30,12 @@ export interface Order {
   createdAt: number;
   updatedAt: number;
   total: number;
+  isModified?: boolean;
+  kind?: "order" | "modification";
+  parentOrderId?: string;
+  originalItems?: OrderItem[];
+  modificationSummary?: string[];
+  itemDecisions?: ModificationDecisionItem[];
 }
 
 export interface Table {
@@ -32,7 +48,7 @@ export interface MenuItem {
   id: string;
   name: string;
   price: number;
-  dietType: 'veg' | 'non-veg';
+  dietType: "veg" | "non-veg";
   isAvailable?: boolean;
   categoryId: string | null;
   description?: string;
@@ -44,7 +60,7 @@ export interface Category {
   slug: string;
 }
 
-export type ExpenseType = 'item' | 'person';
+export type ExpenseType = "item" | "person";
 
 export interface Expense {
   id: string;

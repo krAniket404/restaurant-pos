@@ -1,7 +1,7 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+"use client";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutGrid,
   Clock,
@@ -9,33 +9,65 @@ import {
   Utensils,
   LogOut,
   Menu,
-  X
-} from 'lucide-react';
-import gsap from 'gsap';
-import { useAuthStore } from '../../store/useAuthStore';
-import { cn } from '../../components/ui/Button';
-import { useOrderStore } from '../../store/useOrderStore';
+  X,
+  GitBranch,
+} from "lucide-react";
+import gsap from "gsap";
+import { useAuthStore } from "../../store/useAuthStore";
+import { cn } from "../../components/ui/Button";
+import { useOrderStore } from "../../store/useOrderStore";
 
 const navItems = [
-  { href: '/supervisor', label: 'All Tables', icon: LayoutGrid, countStatus: null },
-  { href: '/supervisor/orders/requested', label: 'Requested', icon: Clock, countStatus: 'requested' },
-  { href: '/supervisor/orders/served', label: 'Served', icon: Utensils, countStatus: 'served' },
-  { href: '/supervisor/menu', label: 'Menu Availability', icon: ChefHat, countStatus: null },
+  {
+    href: "/supervisor",
+    label: "All Tables",
+    icon: LayoutGrid,
+    countStatus: null,
+  },
+  {
+    href: "/supervisor/orders/requested",
+    label: "Requested",
+    icon: Clock,
+    countStatus: "requested",
+  },
+  {
+    href: "/supervisor/modifications",
+    label: "Modification",
+    icon: GitBranch,
+    countStatus: null,
+  },
+  {
+    href: "/supervisor/orders/served",
+    label: "Served",
+    icon: Utensils,
+    countStatus: "served",
+  },
+  {
+    href: "/supervisor/menu",
+    label: "Menu Availability",
+    icon: ChefHat,
+    countStatus: null,
+  },
 ];
 
-export default function SupervisorLayout({ children }: { children: React.ReactNode }) {
+export default function SupervisorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { orders, subscribeToOrders, lastSeen, markStatusSeen } = useOrderStore();
+  const { orders, subscribeToOrders, lastSeen, markStatusSeen } =
+    useOrderStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
 
   // Swipe gesture states
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(
+    null,
+  );
   const contentRef = React.useRef<HTMLDivElement>(null);
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -49,38 +81,36 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    if (document.body.style.overflow === 'hidden') return;
+    if (document.body.style.overflow === "hidden") return;
     const distance = touchStart - touchEnd;
     const minSwipeDistance = 50;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
     if (isLeftSwipe || isRightSwipe) {
-      const currentIndex = navItems.findIndex(item => item.href === pathname);
+      const currentIndex = navItems.findIndex((item) => item.href === pathname);
       if (currentIndex === -1) return;
 
       if (isLeftSwipe && currentIndex < navItems.length - 1) {
-        setSwipeDirection('left');
+        setSwipeDirection("left");
         router.push(navItems[currentIndex + 1].href);
       } else if (isRightSwipe && currentIndex > 0) {
-        setSwipeDirection('right');
+        setSwipeDirection("right");
         router.push(navItems[currentIndex - 1].href);
       }
     }
   };
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
     if (contentRef.current) {
-      const xOffset = swipeDirection === 'left' ? 100 : swipeDirection === 'right' ? -100 : 0;
+      const xOffset =
+        swipeDirection === "left" ? 100 : swipeDirection === "right" ? -100 : 0;
       const initialY = swipeDirection ? 0 : 20;
 
-      gsap.fromTo(contentRef.current,
+      gsap.fromTo(
+        contentRef.current,
         { opacity: 0, x: xOffset, y: initialY },
-        { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" }
+        { opacity: 1, x: 0, y: 0, duration: 0.5, ease: "power3.out" },
       );
 
       const timer = setTimeout(() => setSwipeDirection(null), 500);
@@ -89,30 +119,30 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
   }, [pathname]);
 
   useEffect(() => {
-    const activeItem = navItems.find(item => item.href === pathname);
+    const activeItem = navItems.find((item) => item.href === pathname);
     if (activeItem && activeItem.countStatus) {
       markStatusSeen(activeItem.countStatus);
     }
   }, [pathname, markStatusSeen]);
 
   useEffect(() => {
-    if (mounted) {
-      if (!user || user.role !== 'supervisor') {
-        router.push('/');
-      }
+    if (!user || user.role !== "supervisor") {
+      router.push("/");
+      return;
     }
     const unsub = subscribeToOrders();
     return () => unsub();
-  }, [user, router, subscribeToOrders, mounted]);
+  }, [user, router, subscribeToOrders]);
 
+  if (!user || user.role !== "supervisor") return null;
 
-
-  if (!mounted || !user || user.role !== 'supervisor') return null;
-
-  const validStatuses = navItems.map(item => item.countStatus).filter(Boolean);
-  const unseenCount = orders.filter(o =>
-    validStatuses.includes(o.status) &&
-    o.updatedAt > (lastSeen[o.status] || 0)
+  const validStatuses = navItems
+    .map((item) => item.countStatus)
+    .filter(Boolean);
+  const unseenCount = orders.filter(
+    (o) =>
+      validStatuses.includes(o.status) &&
+      o.updatedAt > (lastSeen[o.status] || 0),
   ).length;
 
   return (
@@ -123,14 +153,14 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
       onTouchEnd={onTouchEnd}
     >
       {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
-        />
+        <div className="fixed inset-0 bg-black/50 z-40 transition-opacity" />
       )}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl z-50 w-72 transform transition-transform duration-300 ease-in-out",
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl z-50 w-72 transform transition-transform duration-300 ease-in-out",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
         <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl relative">
           <button
             onClick={() => setIsSidebarOpen(false)}
@@ -143,8 +173,12 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
               <Utensils className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Supervisor Panel</h2>
-              <p className="text-xs text-rose-400 font-medium capitalize">@{user.username}</p>
+              <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                Supervisor Panel
+              </h2>
+              <p className="text-xs text-rose-400 font-medium capitalize">
+                @{user.username}
+              </p>
             </div>
           </div>
         </div>
@@ -152,7 +186,9 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            const count = item.countStatus ? orders.filter(o => o.status === item.countStatus).length : 0;
+            const count = item.countStatus
+              ? orders.filter((o) => o.status === item.countStatus).length
+              : 0;
             return (
               <Link
                 key={item.href}
@@ -161,21 +197,29 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
                   "flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 font-medium group",
                   isActive
                     ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/20"
-                    : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+                    : "text-slate-400 hover:bg-slate-800/50 hover:text-white",
                 )}
               >
                 <div className="flex items-center space-x-3">
-                  <Icon className={cn(
-                    "w-5 h-5 transition-transform duration-300",
-                    isActive ? "scale-110" : "group-hover:scale-110 group-hover:text-rose-400"
-                  )} />
+                  <Icon
+                    className={cn(
+                      "w-5 h-5 transition-transform duration-300",
+                      isActive
+                        ? "scale-110"
+                        : "group-hover:scale-110 group-hover:text-rose-400",
+                    )}
+                  />
                   <span>{item.label}</span>
                 </div>
                 {count > 0 && (
-                  <span className={cn(
-                    "text-xs px-2.5 py-1 rounded-full font-bold shadow-sm",
-                    isActive ? "bg-white/20 text-white" : "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20"
-                  )}>
+                  <span
+                    className={cn(
+                      "text-xs px-2.5 py-1 rounded-full font-bold shadow-sm",
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20",
+                    )}
+                  >
                     {count}
                   </span>
                 )}
@@ -185,7 +229,10 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
         </nav>
         <div className="p-6 border-t border-slate-800 bg-slate-900/50 backdrop-blur-xl">
           <button
-            onClick={() => { logout(); router.push('/'); }}
+            onClick={() => {
+              logout();
+              router.push("/");
+            }}
             className="flex items-center space-x-3 w-full px-4 py-3.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-400 rounded-xl transition-all duration-300 font-medium group"
           >
             <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -214,8 +261,6 @@ export default function SupervisorLayout({ children }: { children: React.ReactNo
           </div>
         </div>
       </main>
-
-
     </div>
   );
 }

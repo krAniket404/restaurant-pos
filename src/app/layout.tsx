@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -23,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen flex flex-col bg-slate-50 antialiased`}>
+      <body className="min-h-screen flex flex-col bg-slate-50 antialiased">
         {children}
       </body>
     </html>
