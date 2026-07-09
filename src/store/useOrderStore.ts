@@ -12,6 +12,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../lib/firebase/config";
+import { sanitizeForFirestore } from "../lib/modificationHelpers";
 import { Order, OrderStatus, ModificationDecisionItem } from "../types";
 
 interface OrderStore {
@@ -89,7 +90,7 @@ export const useOrderStore = create<OrderStore>()(
       },
       createOrder: async (tableNumber, items, total) => {
         try {
-          await addDoc(collection(db, "orders"), {
+          const payload = sanitizeForFirestore({
             tableNumber,
             items,
             status: "requested",
@@ -98,6 +99,8 @@ export const useOrderStore = create<OrderStore>()(
             updatedAt: Date.now(),
             kind: "order",
           });
+
+          await addDoc(collection(db, "orders"), payload);
         } catch (error) {
           console.error("Error creating order in Firestore:", error);
         }
@@ -113,7 +116,7 @@ export const useOrderStore = create<OrderStore>()(
         try {
           const itemDecisions: ModificationDecisionItem[] = items.map(
             (item) => ({
-              id: item.id,
+              id: item.id || item.menuItemId,
               menuItemId: item.menuItemId,
               name: item.name,
               price: item.price,
@@ -127,7 +130,7 @@ export const useOrderStore = create<OrderStore>()(
             }),
           );
 
-          await addDoc(collection(db, "orders"), {
+          const payload = sanitizeForFirestore({
             tableNumber,
             items,
             status: "requested",
@@ -141,6 +144,8 @@ export const useOrderStore = create<OrderStore>()(
             itemDecisions,
             isModified: true,
           });
+
+          await addDoc(collection(db, "orders"), payload);
         } catch (error) {
           console.error(
             "Error creating modification request in Firestore:",
@@ -151,7 +156,7 @@ export const useOrderStore = create<OrderStore>()(
       updateOrderStatus: async (orderId, status) => {
         try {
           const orderRef = doc(db, "orders", orderId);
-          const updateData: any = { status, updatedAt: Date.now() };
+          const updateData: Partial<Order> = { status, updatedAt: Date.now() };
           await updateDoc(orderRef, updateData);
         } catch (error) {
           console.error("Error updating order status:", error);

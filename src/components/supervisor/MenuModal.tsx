@@ -7,7 +7,20 @@ import { X, Plus, Minus, Search, ArrowUp } from "lucide-react";
 import { Button } from "../ui/Button";
 import { useOrderStore } from "../../store/useOrderStore";
 import { BillPreview } from "../cashier/BillPreview";
-import { formatModificationChanges } from "../../lib/modificationHelpers";
+import {
+  formatModificationChanges,
+  getModifiedItems,
+} from "../../lib/modificationHelpers";
+
+const createTempId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+};
+
+const getCurrentTimestamp = () => Date.now();
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -26,7 +39,6 @@ export const MenuModal: React.FC<MenuModalProps> = ({
   isModification = false,
   existingOrder,
 }) => {
-  const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -46,33 +58,39 @@ export const MenuModal: React.FC<MenuModalProps> = ({
   const { createOrder, createModificationRequest } = useOrderStore();
 
   useEffect(() => {
-    setMounted(true);
     getCategories().then(setCategories).catch(console.error);
     getMenuItems().then(setMenuItems).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setCartItems(
-        isModification && existingOrder
-          ? existingOrder.items.map((item) => ({
-              ...item,
-              id: `${item.id}-${Date.now()}`,
-            }))
-          : [],
-      );
+    if (!isOpen) {
+      document.body.style.overflow = "";
+      return undefined;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    const nextCartItems =
+      isModification && existingOrder
+        ? existingOrder.items.map((item) => ({
+            ...item,
+            id: `${item.id}-${createTempId()}`,
+          }))
+        : [];
+
+    const resetTimer = window.setTimeout(() => {
+      setCartItems(nextCartItems);
       setShowConfirmation(false);
       setConfirmedOrderToPrint(null);
-    } else {
-      document.body.style.overflow = "";
-    }
+    }, 0);
+
     return () => {
+      window.clearTimeout(resetTimer);
       document.body.style.overflow = "";
     };
   }, [isOpen, isModification, existingOrder]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen) return null;
 
   const filteredItems = menuItems.filter((item) => {
     if (item.isAvailable === false) return false;
@@ -91,7 +109,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({
 
   const handleAddItem = (item: MenuItem) => {
     const newItem: OrderItem = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: createTempId(),
       menuItemId: item.id,
       name: item.name,
       price: item.price,
@@ -183,21 +201,26 @@ export const MenuModal: React.FC<MenuModalProps> = ({
     const finalizedItems = cartItems
       .filter((item) => item.quantity > 0)
       .map((item) => ({ ...item }));
+    const modifiedItems = getModifiedItems(
+      existingOrder?.items || [],
+      finalizedItems,
+    );
     const summary = formatModificationChanges(
       existingOrder?.items || [],
       finalizedItems,
     );
 
     const newOrder: Order = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: createTempId(),
       tableNumber: tNum,
       status: "requested",
-      items: finalizedItems,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      items: modifiedItems,
+      createdAt: getCurrentTimestamp(),
+      updatedAt: getCurrentTimestamp(),
       total: totalCost,
       kind: isModification ? "modification" : "order",
       parentOrderId: existingOrder?.id,
+      originalItems: existingOrder?.items || [],
       modificationSummary: summary,
       isModified: isModification,
     };
@@ -207,7 +230,7 @@ export const MenuModal: React.FC<MenuModalProps> = ({
         tNum,
         existingOrder.id,
         existingOrder.items,
-        finalizedItems,
+        modifiedItems,
         totalCost,
         summary,
       );

@@ -57,7 +57,89 @@ function formatModificationChanges(originalItems = [], proposedItems = []) {
   );
 }
 
+function getNewlyAddedItems(originalItems = [], proposedItems = []) {
+  const byId = new Map(
+    (originalItems || []).map((item) => [item.menuItemId, normalizeItem(item)]),
+  );
+  const proposedMap = new Map(
+    (proposedItems || []).map((item) => [item.menuItemId, normalizeItem(item)]),
+  );
+  const newItems = [];
+  const allKeys = new Set([...byId.keys(), ...proposedMap.keys()]);
+
+  for (const menuItemId of allKeys) {
+    const originalItem = byId.get(menuItemId);
+    const proposedItem = proposedMap.get(menuItemId);
+    const originalQuantity = originalItem?.quantity || 0;
+    const proposedQuantity = proposedItem?.quantity || 0;
+    const addedQuantity = proposedQuantity - originalQuantity;
+
+    if (addedQuantity > 0) {
+      newItems.push({
+        name: proposedItem?.name || originalItem?.name || "Item",
+        quantity: addedQuantity,
+      });
+    }
+  }
+
+  return newItems;
+}
+
+function sanitizeForFirestore(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => sanitizeForFirestore(item))
+      .filter((item) => item !== undefined);
+  }
+
+  if (value && typeof value === "object") {
+    return Object.entries(value).reduce((acc, [key, nestedValue]) => {
+      const sanitizedValue = sanitizeForFirestore(nestedValue);
+      if (sanitizedValue !== undefined) {
+        acc[key] = sanitizedValue;
+      }
+      return acc;
+    }, {});
+  }
+
+  return value;
+}
+
+function getModifiedItems(originalItems = [], proposedItems = []) {
+  const byId = new Map(
+    (originalItems || []).map((item) => [item.menuItemId, normalizeItem(item)]),
+  );
+  const proposedMap = new Map(
+    (proposedItems || []).map((item) => [item.menuItemId, normalizeItem(item)]),
+  );
+  const modifiedItems = [];
+  const allKeys = new Set([...byId.keys(), ...proposedMap.keys()]);
+
+  for (const menuItemId of allKeys) {
+    const originalItem = byId.get(menuItemId);
+    const proposedItem = proposedMap.get(menuItemId);
+    const originalQuantity = originalItem?.quantity || 0;
+    const proposedQuantity = proposedItem?.quantity || 0;
+
+    if (originalQuantity === proposedQuantity) continue;
+
+    modifiedItems.push({
+      id: proposedItem?.id || originalItem?.id || `${menuItemId}-modified`,
+      menuItemId,
+      name: proposedItem?.name || originalItem?.name || "Item",
+      price: proposedItem?.price || originalItem?.price || 0,
+      quantity: proposedQuantity,
+      instructions: proposedItem?.instructions || [],
+    });
+  }
+
+  return modifiedItems;
+}
+
 module.exports = {
   buildModificationChanges,
   formatModificationChanges,
+  getNewlyAddedItems,
+  getModifiedItems,
+  sanitizeForFirestore,
 };

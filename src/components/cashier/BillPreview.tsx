@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Order } from "../../types";
+import { getNewlyAddedItems } from "../../lib/modificationHelpers";
 import { Printer, Check } from "lucide-react";
 
 interface BillPreviewProps {
@@ -50,6 +51,14 @@ export const BillPreview: React.FC<BillPreviewProps> = ({
   const subtotal = orders.reduce((sum, o) => sum + o.total, 0);
   const grandTotal = subtotal;
   const tableNumber = orders[0].tableNumber;
+  const firstOrder = orders[0];
+  const newItems =
+    kind === "modification"
+      ? getNewlyAddedItems(
+          firstOrder?.originalItems || [],
+          firstOrder?.items || [],
+        )
+      : [];
 
   const handlePrint = () => {
     // In a real app, this would use window.print() and CSS @media print
@@ -99,19 +108,39 @@ export const BillPreview: React.FC<BillPreviewProps> = ({
           </div>
 
           {kind === "modification" && (
-            <div className="mb-4 rounded-lg border border-amber-400 bg-amber-100 p-3">
-              <p className="text-center text-lg font-black uppercase tracking-[0.25em] text-amber-700">
-                MODIFIED
-              </p>
-              {changeSummary.length > 0 && (
-                <ul className="mt-2 space-y-1 text-xs text-amber-800">
-                  {changeSummary.map((entry, index) => (
-                    <li key={`${entry}-${index}`} className="font-semibold">
-                      • {entry}
-                    </li>
-                  ))}
-                </ul>
+            <div className="mb-4 space-y-3">
+              {newItems.length > 0 && (
+                <div className="rounded-lg border border-emerald-600 bg-emerald-50 p-3">
+                  <p className="text-center text-lg font-black uppercase tracking-[0.25em] text-emerald-700">
+                    New items
+                  </p>
+                  <ul className="mt-2 space-y-1 text-xs text-emerald-800">
+                    {newItems.map((entry, index) => (
+                      <li
+                        key={`${entry.name}-${index}`}
+                        className="font-semibold"
+                      >
+                        • {entry.name} × {entry.quantity}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
+
+              <div className="rounded-lg border border-amber-400 bg-amber-100 p-3">
+                <p className="text-center text-lg font-black uppercase tracking-[0.25em] text-amber-700">
+                  MODIFIED
+                </p>
+                {changeSummary.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs text-amber-800">
+                    {changeSummary.map((entry, index) => (
+                      <li key={`${entry}-${index}`} className="font-semibold">
+                        • {entry}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
           )}
 

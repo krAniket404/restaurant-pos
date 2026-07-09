@@ -1,66 +1,91 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, use } from 'react';
-import { useRouter } from 'next/navigation';
-import gsap from 'gsap';
-import { ArrowLeft, Lock, User } from 'lucide-react';
-import { useAuthStore } from '../../../store/useAuthStore';
-import { getUserByUsername } from '../../../lib/firebase/db';
-import { hashPassword } from '../../../lib/hash';
-import { Button } from '../../../components/ui/Button';
-import { Card, CardContent } from '../../../components/ui/Card';
+import React, { useState, useRef, use } from "react";
+import { useRouter } from "next/navigation";
+import gsap from "gsap";
+import { ArrowLeft, Lock, User } from "lucide-react";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { getUserByUsername } from "../../../lib/firebase/db";
+import { hashPassword } from "../../../lib/hash";
+import { Button } from "../../../components/ui/Button";
+import { Card, CardContent } from "../../../components/ui/Card";
+import { getAuthSessionFromCookie } from "../../../lib/auth";
 
-export default function LoginPage({ params }: { params: Promise<{ role: string }> }) {
+export default function LoginPage({
+  params,
+}: {
+  params: Promise<{ role: string }>;
+}) {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, user, logout } = useAuthStore();
   const formRef = useRef<HTMLDivElement>(null);
 
   const resolvedParams = use(params);
   const role = resolvedParams.role;
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
+    const session = getAuthSessionFromCookie();
+
+    if (session?.role) {
+      router.push(`/${session.role}`);
+      return;
+    }
+
+    if (user && !session) {
+      logout();
+    }
+
     if (formRef.current) {
-      gsap.fromTo(formRef.current,
+      gsap.fromTo(
+        formRef.current,
         { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" },
       );
     }
-  }, [role]);
+  }, [role, user, router, logout]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const user = await getUserByUsername(username);
       if (!user) {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
-      
+
       const hashedAttempt = await hashPassword(password);
-      
+
       if (user.role === role && user.password === hashedAttempt) {
-        login({ role: role as any, username });
+        login({ role: role as "owner" | "cashier" | "supervisor", username });
         router.push(`/${role}`);
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
     } catch (err) {
       console.error(err);
-      setError('Invalid credentials. Please try again.');
-      gsap.fromTo(formRef.current, { x: -10 }, { x: 10, duration: 0.1, yoyo: true, repeat: 3, onComplete: () => gsap.to(formRef.current, { x: 0 }) });
+      setError("Invalid credentials. Please try again.");
+      gsap.fromTo(
+        formRef.current,
+        { x: -10 },
+        {
+          x: 10,
+          duration: 0.1,
+          yoyo: true,
+          repeat: 3,
+          onComplete: () => gsap.to(formRef.current, { x: 0 }),
+        },
+      );
     } finally {
       setLoading(false);
     }
   };
-
-  if (!role) return null;
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-slate-200 min-h-screen">
@@ -75,7 +100,9 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
         <Card className="shadow-2xl border-0 overflow-hidden glass">
           <div className="bg-slate-900 text-white p-8 text-center">
             <h2 className="text-3xl font-bold capitalize">{role} Login</h2>
-            <p className="text-slate-400 mt-2">Enter your credentials to continue</p>
+            <p className="text-slate-400 mt-2">
+              Enter your credentials to continue
+            </p>
           </div>
 
           <CardContent className="p-8">
@@ -87,7 +114,9 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Username</label>
+                <label className="text-sm font-semibold text-slate-700">
+                  Username
+                </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
@@ -102,7 +131,9 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Password</label>
+                <label className="text-sm font-semibold text-slate-700">
+                  Password
+                </label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
@@ -116,8 +147,13 @@ export default function LoginPage({ params }: { params: Promise<{ role: string }
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? 'Authenticating...' : 'Login'}
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={loading}
+              >
+                {loading ? "Authenticating..." : "Login"}
               </Button>
             </form>
           </CardContent>
