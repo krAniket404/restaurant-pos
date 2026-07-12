@@ -29,7 +29,7 @@ export default function SupervisorOrdersPage({
       Boolean(o.parentOrderId) ||
       Boolean(o.itemDecisions?.length);
 
-    return !isModificationOrder && o.status === status;
+    return !isModificationOrder && o.status === status && o.tableNumber !== 0;
   });
 
   const getStatusTitle = () => {

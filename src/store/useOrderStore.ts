@@ -93,7 +93,7 @@ export const useOrderStore = create<OrderStore>()(
           const payload = sanitizeForFirestore({
             tableNumber,
             items,
-            status: "requested",
+            status: tableNumber === 0 ? "served" : "requested",
             total,
             createdAt: Date.now(),
             updatedAt: Date.now(),

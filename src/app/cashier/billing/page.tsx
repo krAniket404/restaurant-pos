@@ -70,7 +70,9 @@ export default function CashierBillingPage() {
             <Card key={merged.tableNumber} className="flex flex-col hover:shadow-lg transition-shadow">
               <div className="p-6 border-b flex justify-between items-start">
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-800">Table {merged.tableNumber}</h3>
+                  <h3 className="text-2xl font-bold text-slate-800">
+                    {merged.tableNumber === 0 ? "Parcel Order" : `Table ${merged.tableNumber}`}
+                  </h3>
                   <p className="text-sm text-slate-500 mt-1">
                     {new Date(merged.earliestTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>

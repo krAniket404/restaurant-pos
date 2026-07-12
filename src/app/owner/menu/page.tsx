@@ -65,12 +65,23 @@ export default function MenuManagementPage() {
   const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    
+    const trimmedName = categoryName.trim();
+    const isDuplicate = categories.some(
+      cat => cat.name.toLowerCase() === trimmedName.toLowerCase() && cat.id !== editingCategory?.id
+    );
+    if (isDuplicate) {
+      alert('A category with this name already exists.');
+      setIsSaving(false);
+      return;
+    }
+
     try {
-      const slug = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const slug = trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
       if (editingCategory) {
-        await updateCategory(editingCategory.id, categoryName, slug);
+        await updateCategory(editingCategory.id, trimmedName, slug);
       } else {
-        await addCategory(categoryName, slug);
+        await addCategory(trimmedName, slug);
       }
       setIsCategoryModalOpen(false);
       await fetchData();
@@ -120,9 +131,20 @@ export default function MenuManagementPage() {
   const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+
+    const trimmedName = itemName.trim();
+    const isDuplicate = items.some(
+      item => item.name.toLowerCase() === trimmedName.toLowerCase() && item.id !== editingItem?.id
+    );
+    if (isDuplicate) {
+      alert('A menu item with this name already exists.');
+      setIsSaving(false);
+      return;
+    }
+
     try {
       const itemData: Omit<MenuItem, 'id'> = {
-        name: itemName,
+        name: trimmedName,
         price: itemPrice,
         dietType: itemDiet,
         categoryId: itemCategoryId || null,

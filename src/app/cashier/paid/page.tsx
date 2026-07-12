@@ -42,7 +42,9 @@ export default function CashierPaidPage() {
             <Card key={order.id} className="flex flex-col">
               <div className="p-6 border-b flex justify-between items-start">
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-800">Table {order.tableNumber}</h3>
+                  <h3 className="text-2xl font-bold text-slate-800">
+                    {order.tableNumber === 0 ? "Parcel Order" : `Table ${order.tableNumber}`}
+                  </h3>
                   <p className="text-sm text-slate-500 mt-1">
                     {new Date(order.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
@@ -78,6 +80,7 @@ export default function CashierPaidPage() {
         onClose={() => setViewingOrder(null)}
         orders={viewingOrder ? [viewingOrder] : null}
         restaurantName={restaurantName}
+        isParcel={viewingOrder?.tableNumber === 0}
       />
     </div>
   );

@@ -10,9 +10,10 @@ export default function SupervisorModificationsPage() {
 
   const modifications = orders.filter(
     (order) =>
-      order.kind === "modification" ||
-      Boolean(order.parentOrderId) ||
-      Boolean(order.itemDecisions?.length),
+      (order.kind === "modification" ||
+        Boolean(order.parentOrderId) ||
+        Boolean(order.itemDecisions?.length)) &&
+      order.status === "requested",
   );
 
   return (
